@@ -1,11 +1,12 @@
 # app.py
 
 import streamlit as st
-import teacher, lesson_creator
+import teacher, creator, description
 
 PAGES = {
+    "Description": description,
+    "Lesson Creator": creator,
     "Teacher": teacher,
-    "Lesson Creator": lesson_creator
 }
 
 def main():
