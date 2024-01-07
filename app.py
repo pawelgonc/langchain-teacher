@@ -3,6 +3,9 @@
 import streamlit as st
 import teacher, creator, description
 
+# Set the page config
+st.set_page_config(page_title="LangChain", page_icon="🦜")
+
 PAGES = {
     "Description": description,
     "Lesson Creator": creator,

@@ -12,8 +12,6 @@ from langchain.chains import LLMChain
 import os
 from teacher_prompt import load_section_prompt
 
-st.set_page_config(page_title="LangChain: Custom Lesson", page_icon="🦜")
-
 def app():
     st.title('Teacher')
     button_css = """.stButton>button {
