@@ -48,7 +48,7 @@ class Lesson:
             self.current_section = None  # No more sections
 
     def load_content(self):
-        with open(f"lc_guides/{self.filename}", "r") as file:
+        with open(f"lessons/{self.filename}", "r") as file:
             content = file.read()
             sections = content.split("-----")
             self.title = sections[1].strip()
@@ -130,11 +130,11 @@ def display_messages():
 # Initialize LangSmith client
 client = Client()
 
-# Get all lesson files in the lc_guides directory
-lesson_files = os.listdir("lc_guides")
+# Get all lesson files in the lessons directory
+lesson_files = os.listdir("lessons")
 
 # Lesson selection sidebar
-lesson_file = st.sidebar.selectbox("Select Lesson", os.listdir("lc_guides"))
+lesson_file = st.sidebar.selectbox("Select Lesson", os.listdir("lessons"))
 
 # Create a new Lesson object
 lesson = Lesson(lesson_file)
