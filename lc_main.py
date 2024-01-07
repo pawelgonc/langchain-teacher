@@ -1,3 +1,5 @@
+#lc_main.py
+
 from dotenv import load_dotenv
 load_dotenv()
 import streamlit as st
@@ -9,9 +11,10 @@ from langchain.prompts import ChatPromptTemplate, MessagesPlaceholder, HumanMess
 from langchain.memory import ConversationBufferMemory
 from langchain.chains import LLMChain
 from get_prompt import load_prompt, load_prompt_with_questions
+import os
 
-st.set_page_config(page_title="LangChain: Getting Started Class", page_icon="🦜")
-st.title("🦜 LangChain: Getting Started Class")
+st.set_page_config(page_title="LangChain: Custom Lesson", page_icon="🦜")
+st.title("🦜 LangChain: Custom Lesson")
 button_css = """.stButton>button {
     color: #4F8BF9;
     border-radius: 50%;
@@ -30,61 +33,31 @@ class StreamHandler(BaseCallbackHandler):
         self.text += token
         self.container.markdown(self.text)
 
-# Lesson selection dictionary
-lesson_guides = {
-    "Lesson 1: Getting Started with LangChain": {
-        "file": "lc_guides/getting_started_guide.txt",
-        "description": "This lesson covers the basics of getting started with LangChain."
-    },
-    "Lesson 2: Prompts": {
-        "file": "lc_guides/prompt_guide.txt",
-        "description": "This lesson focuses on prompts and their usage."
-    },
-    "Lesson 3: Language Models": {
-        "file": "lc_guides/models_guide.txt",
-        "description": "This lesson provides an overview of language models."
-    },
-    "Lesson 4: Memory": {
-        "file": "lc_guides/memory_guide.txt",
-        "description": "This lesson is about Memory."
-    },
-    "Lesson 5: Chains": {
-        "file": "lc_guides/chains_guide.txt",
-        "description": "This lesson provides information on Chains in LangChain, their types, and usage."
-    },
-    "Lesson 6: Retrieval": {
-        "file": "lc_guides/retrieval_guide.txt",
-        "description": "This lesson provides information on indexing and retrieving information using LangChain."
-    },
-    "Lesson 7: Agents": {
-        "file": "lc_guides/agents_guide.txt",
-        "description": "This lesson provides information on agents, tools, and toolkits."
-    }
-}
-
 # Initialize LangSmith client
 client = Client()
 
-# Lesson selection sidebar
-lesson_selection = st.sidebar.selectbox("Select Lesson", list(lesson_guides.keys()))
+# Get all lesson files in the lc_guides directory
+lesson_files = os.listdir("lc_guides")
 
-# Display lesson content and description based on selection
-lesson_info = lesson_guides[lesson_selection]
-lesson_content = open(lesson_info["file"], "r").read()
-lesson_description = lesson_info["description"]
+# Lesson selection sidebar
+lesson_file = st.sidebar.selectbox("Select Lesson", lesson_files)
+
+# Load selected lesson content
+lesson_content = open(f"lc_guides/{lesson_file}", "r").read()
 
 # Radio buttons for lesson type selection
 lesson_type = st.sidebar.radio("Select Lesson Type", ["Instructions based lesson", "Interactive lesson with questions"])
 
 # Clear chat session if dropdown option or radio button changes
-if st.session_state.get("current_lesson") != lesson_selection or st.session_state.get("current_lesson_type") != lesson_type:
-    st.session_state["current_lesson"] = lesson_selection
+if st.session_state.get("current_lesson") != lesson_file or st.session_state.get("current_lesson_type") != lesson_type:
+    st.session_state["current_lesson"] = lesson_file
     st.session_state["current_lesson_type"] = lesson_type
     st.session_state["messages"] = [AIMessage(content="Welcome! This short course will help you get started with LangChain. Let me know when you're all set to jump in!")]
 
-# Display lesson name and description
-st.markdown(f"**{lesson_selection}**")
-st.write(lesson_description)
+
+# Display lesson name and content
+st.markdown(f"**{lesson_file}**")
+st.write(lesson_content)
 
 # Message handling and interaction
 def send_feedback(run_id, score):
@@ -113,7 +86,7 @@ if prompt := st.chat_input():
         response = chain(
             {"input": prompt, "chat_history": st.session_state.messages[-20:]},
             include_run_info=True,
-            tags=[lesson_selection, lesson_type]
+            tags=[lesson_file, lesson_type]
         )
         st.session_state.messages.append(HumanMessage(content=prompt))
         st.session_state.messages.append(AIMessage(content=response[chain.output_key]))
