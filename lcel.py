@@ -61,7 +61,7 @@ with open("lcel/blog.txt") as f:
 with open("lcel/lesson.txt") as f:
     lesson = f.read()
 
-from get_prompt import load_prompt
+from teacher_prompt import load_prompt
 from langchain.prompts import ChatPromptTemplate, MessagesPlaceholder, HumanMessagePromptTemplate
 from langchain.schema import SystemMessage
 from langchain.memory import ConversationBufferMemory

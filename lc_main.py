@@ -10,8 +10,8 @@ from langchain.callbacks.base import BaseCallbackHandler
 from langchain.prompts import ChatPromptTemplate, MessagesPlaceholder, HumanMessagePromptTemplate
 from langchain.memory import ConversationBufferMemory
 from langchain.chains import LLMChain
-from get_prompt import load_prompt, load_prompt_with_questions
 import os
+from teacher_prompt import load_section_prompt
 
 st.set_page_config(page_title="LangChain: Custom Lesson", page_icon="🦜")
 st.title("🦜 LangChain: Custom Lesson")
@@ -36,15 +36,38 @@ class StreamHandler(BaseCallbackHandler):
 class Lesson:
     def __init__(self, filename):
         self.filename = filename
-        self.content = self.load_content()
+        self.sections = ["title", "background_and_prerequisites", "learning_objectives", "content_delivery", "introduction", "main_points", "conclusion", "next_steps"]
+        self.current_section_index = 0
+        self.load_content()
+
+    def update_current_section(self):
+        if self.current_section_index < len(self.sections):
+            self.current_section = self.sections[self.current_section_index]
+            self.current_section_index += 1
+        else:
+            self.current_section = None  # No more sections
 
     def load_content(self):
         with open(f"lc_guides/{self.filename}", "r") as file:
-            return file.read()
+            content = file.read()
+            sections = content.split("-----")
+            self.title = sections[1].strip()
+            self.background_and_prerequisites = sections[2].strip()
+            self.learning_objectives = sections[3].strip()
+            self.content_delivery = sections[4].strip()
+            self.introduction = sections[5].strip()
+            self.main_points = self.parse_main_points(sections[6])
+            self.conclusion = sections[7].strip()
+            self.next_steps = sections[8].strip()
 
+    def parse_main_points(self, main_points_section):
+        main_points = main_points_section.split("\n-----")
+        return [point.strip() for point in main_points]
+    
     def display(self):
-        st.markdown(f"**{self.filename}**")
-        st.write(self.content)
+        st.markdown(f"**{self.title}**")
+        st.write(self.background_and_prerequisites)
+        st.write(self.learning_objectives)
 
 def handle_user_input():
     if prompt := st.chat_input():
@@ -53,14 +76,14 @@ def handle_user_input():
     return None
 
 def handle_assistant_response(prompt, lesson):
+    lesson.update_current_section()  # Update current_section before using it
+
     with st.chat_message("assistant"):
         stream_handler = StreamHandler(st.empty())
         model = ChatOpenAI(streaming=True, callbacks=[stream_handler], model="gpt-3.5-turbo-16k")
 
-        if lesson_type == "Instructions based lesson":
-            prompt_template = load_prompt(content=lesson.content)
-        else:
-            prompt_template = load_prompt_with_questions(content=lesson.content)
+        # Use the general prompt template for the current section
+        prompt_template = load_section_prompt(lesson.current_section, getattr(lesson, lesson.current_section))
 
         chain = LLMChain(prompt=prompt_template, llm=model)
 
@@ -86,12 +109,12 @@ def display_feedback_buttons(run_id):
     with col2:
         st.button("👎", on_click=send_feedback, args=(run_id, 0))
 
-# Clear chat session if dropdown option or radio button changes
 def initialize_state():
     if st.session_state.get("current_lesson") != lesson_file or st.session_state.get("current_lesson_type") != lesson_type:
         st.session_state["current_lesson"] = lesson_file
         st.session_state["current_lesson_type"] = lesson_type
-        st.session_state["messages"] = [AIMessage(content="Welcome! This short course will help you get started with LangChain. Let me know when you're all set to jump in!")]
+        welcome_message = f"Once you are prepared, we shall begin our exploration of {lesson_file}. I will be your guide throughout this intellectual journey."
+        st.session_state["messages"] = [AIMessage(content=welcome_message)]
 
 # Message handling and interaction
 def send_feedback(run_id, score):
@@ -113,8 +136,9 @@ lesson_files = os.listdir("lc_guides")
 # Lesson selection sidebar
 lesson_file = st.sidebar.selectbox("Select Lesson", os.listdir("lc_guides"))
 
-# Create a new Lesson object and display the lesson
+# Create a new Lesson object
 lesson = Lesson(lesson_file)
+# Display the title, background and prerequisites, and learning objectives
 lesson.display()
 
 # Radio buttons for lesson type selection
