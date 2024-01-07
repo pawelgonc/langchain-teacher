@@ -75,28 +75,41 @@ def handle_user_input():
         return user_input
     return None
 
+def get_prompt_template(current_lesson):
+    # Use the general prompt template for the current section
+    prompt_template = load_section_prompt(current_lesson.active_section, getattr(current_lesson, current_lesson.active_section))
+    return prompt_template
+
+def get_llm_chain(prompt_template):
+    stream_handler = StreamHandler(st.empty())
+    model = ChatOpenAI(streaming=True, callbacks=[stream_handler], model="gpt-3.5-turbo-16k")
+    chain = LLMChain(prompt=prompt_template, llm=model)
+    return chain
+
+def get_response(chain, user_input):
+    response = chain(
+        {"input": user_input, "chat_history": st.session_state.messages[-20:]},
+        include_run_info=True,
+        tags=[current_lesson.filename, selected_lesson_type]
+    )
+    return response
+
+def update_messages(user_input, response, chain):
+    st.session_state.messages.append(HumanMessage(content=user_input))
+    st.session_state.messages.append(AIMessage(content=response[chain.output_key]))
+
 def handle_assistant_response(user_input, current_lesson):
     current_lesson.update_current_section()  # Update current_section before using it
 
     with st.chat_message("assistant"):
-        stream_handler = StreamHandler(st.empty())
-        model = ChatOpenAI(streaming=True, callbacks=[stream_handler], model="gpt-3.5-turbo-16k")
-
-        # Use the general prompt template for the current section
-        prompt_template = load_section_prompt(current_lesson.active_section, getattr(current_lesson, current_lesson.active_section))
-
-        chain = LLMChain(prompt=prompt_template, llm=model)
-
-        response = chain(
-            {"input": user_input, "chat_history": st.session_state.messages[-20:]},
-            include_run_info=True,
-            tags=[current_lesson.filename, selected_lesson_type]
-        )
-        st.session_state.messages.append(HumanMessage(content=user_input))
-        st.session_state.messages.append(AIMessage(content=response[chain.output_key]))
+        prompt_template = get_prompt_template(current_lesson)
+        chain = get_llm_chain(prompt_template)
+        response = get_response(chain, user_input)
+        update_messages(user_input, response, chain)
         run_id = response["__run"].run_id
 
         display_feedback_buttons(run_id)  # Display feedback buttons after assistant's response
+
 
 def display_feedback_buttons(run_id):
     col_blank, col_text, col1, col2 = st.columns([10, 2, 1, 1])
