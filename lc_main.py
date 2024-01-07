@@ -68,6 +68,13 @@ class Lesson:
         st.markdown(f"**{self.title}**")
         st.write(self.background_and_prerequisites)
         st.write(self.learning_objectives)
+    
+    def set_section(self, section_title):
+        if section_title in self.lesson_sections:
+            self.active_section_index = self.lesson_sections.index(section_title)
+            self.update_current_section()
+        else:
+            print(f"Section '{section_title}' not found in lesson.")
 
 def handle_user_input():
     if user_input := st.chat_input():
@@ -99,7 +106,12 @@ def update_messages(user_input, response, chain):
     st.session_state.messages.append(AIMessage(content=response[chain.output_key]))
 
 def handle_assistant_response(user_input, current_lesson):
-    current_lesson.update_current_section()  # Update current_section before using it
+    # Check if the user's input contains a command to switch sections
+    if user_input.startswith("switch to "):
+        section_title = user_input[len("switch to "):]
+        current_lesson.set_section(section_title)
+    else:
+        current_lesson.update_current_section()  # Update current_section before using it
 
     with st.chat_message("assistant"):
         prompt_template = get_prompt_template(current_lesson)
@@ -109,7 +121,6 @@ def handle_assistant_response(user_input, current_lesson):
         run_id = response["__run"].run_id
 
         display_feedback_buttons(run_id)  # Display feedback buttons after assistant's response
-
 
 def display_feedback_buttons(run_id):
     col_blank, col_text, col1, col2 = st.columns([10, 2, 1, 1])
