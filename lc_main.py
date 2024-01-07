@@ -73,17 +73,36 @@ def handle_assistant_response(prompt, lesson):
         st.session_state.messages.append(AIMessage(content=response[chain.output_key]))
         run_id = response["__run"].run_id
 
-        col_blank, col_text, col1, col2 = st.columns([10, 2, 1, 1])
-        with col_text:
-            st.text("Feedback:")
+        display_feedback_buttons(run_id)  # Display feedback buttons after assistant's response
 
-        with col1:
-            st.button("👍", on_click=send_feedback, args=(run_id, 1))
+def display_feedback_buttons(run_id):
+    col_blank, col_text, col1, col2 = st.columns([10, 2, 1, 1])
+    with col_text:
+        st.text("Feedback:")
 
-        with col2:
-            st.button("👎", on_click=send_feedback, args=(run_id, 0))
+    with col1:
+        st.button("👍", on_click=send_feedback, args=(run_id, 1))
 
-# ... (rest of the script)
+    with col2:
+        st.button("👎", on_click=send_feedback, args=(run_id, 0))
+
+# Clear chat session if dropdown option or radio button changes
+def initialize_state():
+    if st.session_state.get("current_lesson") != lesson_file or st.session_state.get("current_lesson_type") != lesson_type:
+        st.session_state["current_lesson"] = lesson_file
+        st.session_state["current_lesson_type"] = lesson_type
+        st.session_state["messages"] = [AIMessage(content="Welcome! This short course will help you get started with LangChain. Let me know when you're all set to jump in!")]
+
+# Message handling and interaction
+def send_feedback(run_id, score):
+    client.create_feedback(run_id, "user_score", score=score)
+
+def display_messages():
+    for msg in st.session_state["messages"]:
+        if isinstance(msg, HumanMessage):
+            st.chat_message("user").write(msg.content)
+        else:
+            st.chat_message("assistant").write(msg.content)
 
 # Initialize LangSmith client
 client = Client()
@@ -101,21 +120,9 @@ lesson.display()
 # Radio buttons for lesson type selection
 lesson_type = st.sidebar.radio("Select Lesson Type", ["Instructions based lesson", "Interactive lesson with questions"])
 
-# Clear chat session if dropdown option or radio button changes
-if st.session_state.get("current_lesson") != lesson_file or st.session_state.get("current_lesson_type") != lesson_type:
-    st.session_state["current_lesson"] = lesson_file
-    st.session_state["current_lesson_type"] = lesson_type
-    st.session_state["messages"] = [AIMessage(content="Welcome! This short course will help you get started with LangChain. Let me know when you're all set to jump in!")]
+initialize_state()
 
-# Message handling and interaction
-def send_feedback(run_id, score):
-    client.create_feedback(run_id, "user_score", score=score)
-
-for msg in st.session_state["messages"]:
-    if isinstance(msg, HumanMessage):
-        st.chat_message("user").write(msg.content)
-    else:
-        st.chat_message("assistant").write(msg.content)
+display_messages()
 
 # Handle user input and assistant responses
 if prompt := handle_user_input():
