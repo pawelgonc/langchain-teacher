@@ -33,60 +33,41 @@ class StreamHandler(BaseCallbackHandler):
         self.text += token
         self.container.markdown(self.text)
 
-# Initialize LangSmith client
-client = Client()
+class Lesson:
+    def __init__(self, filename):
+        self.filename = filename
+        self.content = self.load_content()
 
-# Get all lesson files in the lc_guides directory
-lesson_files = os.listdir("lc_guides")
+    def load_content(self):
+        with open(f"lc_guides/{self.filename}", "r") as file:
+            return file.read()
 
-# Lesson selection sidebar
-lesson_file = st.sidebar.selectbox("Select Lesson", lesson_files)
+    def display(self):
+        st.markdown(f"**{self.filename}**")
+        st.write(self.content)
 
-# Load selected lesson content
-lesson_content = open(f"lc_guides/{lesson_file}", "r").read()
+def handle_user_input():
+    if prompt := st.chat_input():
+        st.chat_message("user").write(prompt)
+        return prompt
+    return None
 
-# Radio buttons for lesson type selection
-lesson_type = st.sidebar.radio("Select Lesson Type", ["Instructions based lesson", "Interactive lesson with questions"])
-
-# Clear chat session if dropdown option or radio button changes
-if st.session_state.get("current_lesson") != lesson_file or st.session_state.get("current_lesson_type") != lesson_type:
-    st.session_state["current_lesson"] = lesson_file
-    st.session_state["current_lesson_type"] = lesson_type
-    st.session_state["messages"] = [AIMessage(content="Welcome! This short course will help you get started with LangChain. Let me know when you're all set to jump in!")]
-
-
-# Display lesson name and content
-st.markdown(f"**{lesson_file}**")
-st.write(lesson_content)
-
-# Message handling and interaction
-def send_feedback(run_id, score):
-    client.create_feedback(run_id, "user_score", score=score)
-
-for msg in st.session_state["messages"]:
-    if isinstance(msg, HumanMessage):
-        st.chat_message("user").write(msg.content)
-    else:
-        st.chat_message("assistant").write(msg.content)
-
-if prompt := st.chat_input():
-    st.chat_message("user").write(prompt)
-
+def handle_assistant_response(prompt, lesson):
     with st.chat_message("assistant"):
         stream_handler = StreamHandler(st.empty())
         model = ChatOpenAI(streaming=True, callbacks=[stream_handler], model="gpt-3.5-turbo-16k")
 
         if lesson_type == "Instructions based lesson":
-            prompt_template = load_prompt(content=lesson_content)
+            prompt_template = load_prompt(content=lesson.content)
         else:
-            prompt_template = load_prompt_with_questions(content=lesson_content)
+            prompt_template = load_prompt_with_questions(content=lesson.content)
 
         chain = LLMChain(prompt=prompt_template, llm=model)
 
         response = chain(
             {"input": prompt, "chat_history": st.session_state.messages[-20:]},
             include_run_info=True,
-            tags=[lesson_file, lesson_type]
+            tags=[lesson.filename, lesson_type]
         )
         st.session_state.messages.append(HumanMessage(content=prompt))
         st.session_state.messages.append(AIMessage(content=response[chain.output_key]))
@@ -101,3 +82,41 @@ if prompt := st.chat_input():
 
         with col2:
             st.button("👎", on_click=send_feedback, args=(run_id, 0))
+
+# ... (rest of the script)
+
+# Initialize LangSmith client
+client = Client()
+
+# Get all lesson files in the lc_guides directory
+lesson_files = os.listdir("lc_guides")
+
+# Lesson selection sidebar
+lesson_file = st.sidebar.selectbox("Select Lesson", os.listdir("lc_guides"))
+
+# Create a new Lesson object and display the lesson
+lesson = Lesson(lesson_file)
+lesson.display()
+
+# Radio buttons for lesson type selection
+lesson_type = st.sidebar.radio("Select Lesson Type", ["Instructions based lesson", "Interactive lesson with questions"])
+
+# Clear chat session if dropdown option or radio button changes
+if st.session_state.get("current_lesson") != lesson_file or st.session_state.get("current_lesson_type") != lesson_type:
+    st.session_state["current_lesson"] = lesson_file
+    st.session_state["current_lesson_type"] = lesson_type
+    st.session_state["messages"] = [AIMessage(content="Welcome! This short course will help you get started with LangChain. Let me know when you're all set to jump in!")]
+
+# Message handling and interaction
+def send_feedback(run_id, score):
+    client.create_feedback(run_id, "user_score", score=score)
+
+for msg in st.session_state["messages"]:
+    if isinstance(msg, HumanMessage):
+        st.chat_message("user").write(msg.content)
+    else:
+        st.chat_message("assistant").write(msg.content)
+
+# Handle user input and assistant responses
+if prompt := handle_user_input():
+    handle_assistant_response(prompt, lesson)
