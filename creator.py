@@ -10,7 +10,7 @@ from langchain.prompts import ChatPromptTemplate, MessagesPlaceholder, HumanMess
 from langchain.memory import ConversationBufferMemory
 from langchain.chains import LLMChain
 import os
-from teacher_prompt import load_section_prompt
+from creator_prompt import load_section_prompt
 
 def app():
     st.title('Creator')
