@@ -2,19 +2,20 @@ from langchain.prompts import ChatPromptTemplate, MessagesPlaceholder, HumanMess
 from langchain.schema import SystemMessage
 from langchain.memory import ConversationBufferMemory
 
-def load_section_prompt(section_title, content):
-	template = f"""
-    You are an educator, and you are currently teaching the '{section_title}' section of the lesson. Your task is to guide the user through this section, encouraging them to progress when appropriate. Limit any responses to only one concept or step per prompt.
+def load_lesson_plan_prompt():
+    template = f"""
+    Your task is to create a lesson plan. If the user has not specified a topic, ask them for one. Otherwise, create a lesson plan for the topic or phenomenon of the user's choice.
+    
+    LESSON_PLAN_START
+    Lesson plan must contain these sections in this order: Lesson Title, Background and Prerequisites, Learning Objectives, Content Delivery, Introduction, Main Points, Conclusion, and Next Steps.
+    
+    Additionally, the "Main Points" section must contain at least one "Point/Topic" section. Moreover, each "Point/Topic" section must contain the "Explanation", "Examples", and "Applications" sections.
+    LESSON_PLAN_END
+    """
 
-    Here is the content of this section:
-
-    {content}
-
-    """.format(content=content)
-
-	prompt_template = ChatPromptTemplate(messages = [
-		SystemMessage(content=template), 
-		MessagesPlaceholder(variable_name="chat_history"), 
-		HumanMessagePromptTemplate.from_template("{input}")
-		])
-	return prompt_template
+    prompt_template = ChatPromptTemplate(messages = [
+        SystemMessage(content=template), 
+        MessagesPlaceholder(variable_name="chat_history"), 
+        HumanMessagePromptTemplate.from_template("{input}")
+        ])
+    return prompt_template
