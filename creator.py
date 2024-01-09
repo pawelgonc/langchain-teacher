@@ -47,7 +47,7 @@ def app():
                 self.active_section = None  # No more lesson_sections
 
         def load_content(self):
-            with open(f"lessons/{self.filename}", "r") as file:
+            with open(f"templates/{self.filename}", "r") as file:  # Change this line
                 content = file.read()
                 lesson_sections = content.split("-----")
                 self.title = lesson_sections[1].strip()
@@ -157,7 +157,7 @@ def app():
     lesson_files = os.listdir("lessons")
 
     # Lesson selection sidebar
-    selected_lesson_file = st.sidebar.selectbox("Select Lesson", os.listdir("lessons"))
+    selected_lesson_file = st.sidebar.selectbox("Select Lesson", os.listdir("templates"))  # Change this line
 
     # Create a new Lesson object
     current_lesson = Lesson(selected_lesson_file)
