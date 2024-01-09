@@ -37,27 +37,30 @@ def app():
             self.filename = filename
             self.lesson_sections = ["title", "background_and_prerequisites", "learning_objectives", "content_delivery", "introduction", "main_points", "conclusion", "next_steps"]
             self.active_section_index = 0
-            self.load_content()
+            self.initialize_empty_lesson()
 
+        def initialize_empty_lesson(self):
+            # Initialize an empty lesson with the same sections
+            self.title = ""
+            self.background_and_prerequisites = ""
+            self.learning_objectives = ""
+            self.content_delivery = ""
+            self.introduction = ""
+            self.main_points = []
+            self.conclusion = ""
+            self.next_steps = ""
+
+        def update_section(self, section_title, content):
+            # Update the content of a section based on the user's input
+            if section_title in self.lesson_sections:
+                setattr(self, section_title, content)
+                            
         def update_current_section(self):
             if self.active_section_index < len(self.lesson_sections):
                 self.active_section = self.lesson_sections[self.active_section_index]
                 self.active_section_index += 1
             else:
                 self.active_section = None  # No more lesson_sections
-
-        def load_content(self):
-            with open(f"templates/{self.filename}", "r") as file:  # Change this line
-                content = file.read()
-                lesson_sections = content.split("-----")
-                self.title = lesson_sections[1].strip()
-                self.background_and_prerequisites = lesson_sections[2].strip()
-                self.learning_objectives = lesson_sections[3].strip()
-                self.content_delivery = lesson_sections[4].strip()
-                self.introduction = lesson_sections[5].strip()
-                self.main_points = self.parse_main_points(lesson_sections[6])
-                self.conclusion = lesson_sections[7].strip()
-                self.next_steps = lesson_sections[8].strip()
 
         def parse_main_points(self, main_points_section):
             main_points = main_points_section.split("\n-----")
