@@ -1,26 +1,28 @@
------ Lesson Title:
+
+
+Lesson Title:
 Introduction to Animal Cell Biology
 
------ Background and Prerequisites:
+Background and Prerequisites:
 This lesson is designed for beginners with little to no background in biology. Basic knowledge of scientific terms and a curiosity about the cellular structure of animals will be helpful.
 
------ Learning Objectives:
+Learning Objectives:
 By the end of this lesson, you should be able to:
 1. Understand the basic structure and function of an animal cell.
 2. Identify the major organelles in an animal cell and their roles.
 3. Understand the concept of cellular homeostasis.
 
------ Content Delivery:
+Content Delivery:
 The lesson will be delivered in the following sequence:
 1. Introduction to Animal Cell Biology
 2. Overview of the Animal Cell
 3. Major Organelles
 4. Cellular Homeostasis
 
------ Introduction:
+Introduction:
 Animal cell biology is a fascinating field that explores the science of life at the cellular level - it's about understanding the structure and function of animal cells, and how the different parts interact to make the cell function.
 
------ Main Points:
+Main Points:
 
 First Point/Topic:
 Explanation: An animal cell is made up of several organelles that work together to maintain life. These include the nucleus, mitochondria, endoplasmic reticulum, Golgi apparatus, and lysosomes.
@@ -31,8 +33,9 @@ Explanation:
 Cellular homeostasis is the state of steady internal conditions maintained by living cells. This dynamic state of equilibrium is important for survival and health.
 Examples: Ion concentration, pH, and glucose concentration are just a few examples of the many variables that the cell regulates to maintain homeostasis.
 
------ Conclusion:
+Conclusion:
 In this lesson, we've scratched the surface of animal cell biology, exploring the basic structure and function of an animal cell, the major organelles, and the concept of cellular homeostasis.
 
------ Next Steps:
+Next Steps:
 To deepen your understanding, consider reading a cell biology textbook or taking a course. Keep an eye on recent scientific discoveries in cell biology, as our understanding of the cell is constantly evolving.
+

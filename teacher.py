@@ -33,24 +33,6 @@ def app():
             self.container.markdown(self.text)
 
     class Lesson:
-        def format_section_content(self, content):
-            """
-            Formats the content of the lesson sections, considering only sections separated by '-----'.
-            """
-            # Define the separator string
-            separator = '-----'
-            # Split the content into sections by the separator
-            sections = content.split(separator)
-            # Initialize an empty string to hold the formatted content
-            formatted_content = ''
-            # Iterate over the sections
-            for section in sections:
-                # Strip leading and trailing whitespace from the section
-                section = section.strip()
-                # Add the section to the formatted content, followed by a newline
-                formatted_content += f'{section}\n'
-            return formatted_content
-
         def get_next_section_content(self):
             if self.active_section_index < len(self.lesson_sections):
                 next_section_title = self.lesson_sections[self.active_section_index]
@@ -75,27 +57,17 @@ def app():
         def load_content(self):
             with open(f"lessons/{self.filename}", "r") as file:
                 content = file.read()
-                sections = content.split("-----")
+                sections = content.split("\n\n")  # Use double newline as separator
                 for i, section in enumerate(sections):
                     section = section.strip()
                     if section:  # Ignore empty sections
-                        if "\n----" in section:  # Check if the section has subsections
-                            section_title, subsections = section.split("\n----", 1)
-                            subsections = self.parse_subsections(subsections, "----")
-                            self.lesson_sections.append(section_title.strip())
-                            setattr(self, section_title.strip(), subsections)
-                        else:
+                        if "\n" in section:  # Check if section has a newline
                             section_title, section_content = section.split("\n", 1)
                             self.lesson_sections.append(section_title.strip())
                             setattr(self, section_title.strip(), section_content.strip())
-
-        def parse_subsections(self, subsections, separator):
-            if "\n" + separator[:-1] in subsections:  # Check if the subsections have further nested sections
-                subsection_title, nested_subsections = subsections.split("\n" + separator[:-1], 1)
-                nested_subsections = self.parse_subsections(nested_subsections, separator[:-1])
-                return {subsection_title.strip(): nested_subsections}
-            else:
-                return subsections.split("\n")
+                        else:
+                            self.lesson_sections.append(section)
+                            setattr(self, section, "")
 
         def display(self):
             for section_title in self.lesson_sections[:3]:  # Iterate over the first three sections
@@ -189,9 +161,6 @@ def app():
     # Initialize LangSmith langsmith_client
     langsmith_client = Client()
 
-    # Get all current_lesson files in the lessons directory
-    lesson_files = os.listdir("lessons")
-
     # Lesson selection sidebar
     selected_lesson_file = st.sidebar.selectbox("Select Lesson", os.listdir("lessons"))
 
@@ -202,10 +171,10 @@ def app():
 
     # Dropdown menu for section selection
     selected_section = st.sidebar.selectbox("Select Section", current_lesson.get_section_names(), key='section_select')
-    # Display the content of the selected section
+    # Get the content of the selected section
     section_content = getattr(current_lesson, selected_section)
-    formatted_content = current_lesson.format_section_content(section_content)
-    st.sidebar.markdown(formatted_content)
+    # Display the content in the sidebar
+    st.sidebar.markdown(section_content)
 
     initialize_state()
 
