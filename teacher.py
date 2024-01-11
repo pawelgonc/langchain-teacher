@@ -96,7 +96,7 @@ def app():
         response = chain(
             {"input": user_input, "chat_history": st.session_state.messages[-20:]},
             include_run_info=True,
-            tags=[current_lesson.filename, selected_lesson_type]
+            tags=[current_lesson.filename]  # removed selected_lesson_type
         )
         return response
 
@@ -133,9 +133,8 @@ def app():
             st.button("👎", on_click=send_feedback, args=(run_id, 0))
 
     def initialize_state():
-        if st.session_state.get("current_lesson") != selected_lesson_file or st.session_state.get("current_lesson_type") != selected_lesson_type:
+        if st.session_state.get("current_lesson") != selected_lesson_file:
             st.session_state["current_lesson"] = selected_lesson_file
-            st.session_state["current_lesson_type"] = selected_lesson_type
             welcome_message = f"Once you are prepared, we shall begin our exploration of {selected_lesson_file}. I will be your guide throughout this intellectual journey."
             st.session_state["messages"] = [AIMessage(content=welcome_message)]
 
@@ -163,9 +162,6 @@ def app():
     current_lesson = Lesson(selected_lesson_file)
     # Display the title, background and prerequisites, and learning objectives
     current_lesson.display()
-
-    # Radio buttons for current_lesson type selection
-    selected_lesson_type = st.sidebar.radio("Select Lesson Type", ["Instructions based lesson", "Interactive lesson with questions"])
 
     initialize_state()
 

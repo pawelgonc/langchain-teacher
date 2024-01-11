@@ -1,0 +1,29 @@
+these are great suggestions. Before we begin exploring possible features for addition and making significant changes, let's consider removing some of the less useful ones. For example:
+```
+    # Radio buttons for current_lesson type selection
+    selected_lesson_type = st.sidebar.radio("Select Lesson Type", ["Instructions based lesson", "Interactive lesson with questions"])
+```
+is an artifact from previous versions. The user was able to chose the type of interaction with the teacher. It is no longer useful. I comment that line for debugging step, instead of directly removing it. After that, three errors " "selected_lesson_type" is not defined " arize regarding these two sections of the script:
+1.
+
+```
+    def get_response(chain, user_input):
+        response = chain(
+            {"input": user_input, "chat_history": st.session_state.messages[-20:]},
+            include_run_info=True,
+            tags=[current_lesson.filename, selected_lesson_type]
+        )
+        return response
+```
+
+2.
+```
+    def initialize_state():
+        if st.session_state.get("current_lesson") != selected_lesson_file or st.session_state.get("current_lesson_type") != selected_lesson_type:
+            st.session_state["current_lesson"] = selected_lesson_file
+            st.session_state["current_lesson_type"] = selected_lesson_type
+            welcome_message = f"Once you are prepared, we shall begin our exploration of {selected_lesson_file}. I will be your guide throughout this intellectual journey."
+            st.session_state["messages"] = [AIMessage(content=welcome_message)]
+```
+
+How do I remove this feature? How do I remove the "selected_lesson_type" variable from these sections of the script?
