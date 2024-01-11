@@ -39,21 +39,16 @@ def app():
             """
             # Define the separator string
             separator = '-----'
-
             # Split the content into sections by the separator
             sections = content.split(separator)
-
             # Initialize an empty string to hold the formatted content
             formatted_content = ''
-
             # Iterate over the sections
             for section in sections:
                 # Strip leading and trailing whitespace from the section
                 section = section.strip()
-
                 # Add the section to the formatted content, followed by a newline
                 formatted_content += f'{section}\n'
-
             return formatted_content
 
         def get_next_section_content(self):
