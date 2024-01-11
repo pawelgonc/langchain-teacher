@@ -43,7 +43,7 @@ def app():
             
         def __init__(self, filename):
             self.filename = filename
-            self.lesson_sections = ["title", "background_and_prerequisites", "learning_objectives", "content_delivery", "introduction", "main_points", "conclusion", "next_steps"]
+            self.lesson_sections = []  # Initialize as empty list
             self.active_section_index = 0
             self.load_content()
 
@@ -57,35 +57,44 @@ def app():
         def load_content(self):
             with open(f"lessons/{self.filename}", "r") as file:
                 content = file.read()
-                lesson_sections = content.split("-----")
-                self.title = lesson_sections[1].strip()
-                self.background_and_prerequisites = lesson_sections[2].strip()
-                self.learning_objectives = lesson_sections[3].strip()
-                self.content_delivery = lesson_sections[4].strip()
-                self.introduction = lesson_sections[5].strip()
-                self.main_points = self.parse_main_points(lesson_sections[6])
-                self.conclusion = lesson_sections[7].strip()
-                self.next_steps = lesson_sections[8].strip()
+                sections = content.split("-----")
+                for i, section in enumerate(sections):
+                    section = section.strip()
+                    if section:  # Ignore empty sections
+                        if "\n----" in section:  # Check if the section has subsections
+                            section_title, subsections = section.split("\n----", 1)
+                            subsections = self.parse_subsections(subsections, "----")
+                            self.lesson_sections.append(section_title.strip())
+                            setattr(self, section_title.strip(), subsections)
+                        else:
+                            section_title, section_content = section.split("\n", 1)
+                            self.lesson_sections.append(section_title.strip())
+                            setattr(self, section_title.strip(), section_content.strip())
 
-        def parse_main_points(self, main_points_section):
-            main_points = main_points_section.split("\n-----")
-            return [point.strip() for point in main_points]
-        
+        def parse_subsections(self, subsections, separator):
+            if "\n" + separator[:-1] in subsections:  # Check if the subsections have further nested sections
+                subsection_title, nested_subsections = subsections.split("\n" + separator[:-1], 1)
+                nested_subsections = self.parse_subsections(nested_subsections, separator[:-1])
+                return {subsection_title.strip(): nested_subsections}
+            else:
+                return subsections.split("\n")
+
         def display(self):
-            st.markdown(f"**{self.title}**")
-            st.write(self.background_and_prerequisites)
-            st.write(self.learning_objectives)
-        
+            for section_title in self.lesson_sections[:3]:  # Iterate over the first three sections
+                section_content = getattr(self, section_title)
+                st.markdown(f"**{section_title}**")
+                st.write(section_content)
+
         def set_section(self, section_title):
             if section_title in self.lesson_sections:
                 self.active_section_index = self.lesson_sections.index(section_title)
                 self.update_current_section()
             else:
                 print(f"Section '{section_title}' not found in lesson.")
-        
+
         def get_section_names(self):
             return self.lesson_sections
-
+        
     def handle_user_input():
         if user_input := st.chat_input():
             st.chat_message("user").write(user_input)
@@ -158,6 +167,19 @@ def app():
                 st.chat_message("user").write(msg.content)
             else:
                 st.chat_message("assistant").write(msg.content)
+    
+    def format_section_content(content, separator="----"):
+        formatted_content = ""
+        if isinstance(content, dict):
+            for key, value in content.items():
+                formatted_content += key.replace(separator, "") + "\n"
+                formatted_content += format_section_content(value, separator[:-1])
+        elif isinstance(content, list):
+            for item in content:
+                formatted_content += format_section_content(item, separator)
+        else:  # content is a string
+            formatted_content += content.replace(separator, "") + "\n"
+        return formatted_content
 
     # Initialize LangSmith langsmith_client
     langsmith_client = Client()
@@ -174,10 +196,11 @@ def app():
     current_lesson.display()
 
     # Dropdown menu for section selection
-    selected_section = st.sidebar.selectbox("Browse Sections", current_lesson.get_section_names())
-
+    selected_section = st.sidebar.selectbox("Select Section", current_lesson.get_section_names(), key='section_select')
     # Display the content of the selected section
-    st.sidebar.markdown(getattr(current_lesson, selected_section))
+    section_content = getattr(current_lesson, selected_section)
+    formatted_content = format_section_content(section_content)
+    st.sidebar.markdown(formatted_content)
 
     initialize_state()
 

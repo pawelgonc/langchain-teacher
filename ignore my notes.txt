@@ -1,29 +1,37 @@
-these are great suggestions. Before we begin exploring possible features for addition and making significant changes, let's consider removing some of the less useful ones. For example:
-```
-    # Radio buttons for current_lesson type selection
-    selected_lesson_type = st.sidebar.radio("Select Lesson Type", ["Instructions based lesson", "Interactive lesson with questions"])
-```
-is an artifact from previous versions. The user was able to chose the type of interaction with the teacher. It is no longer useful. I comment that line for debugging step, instead of directly removing it. After that, three errors " "selected_lesson_type" is not defined " arize regarding these two sections of the script:
-1.
+I have a different idea. Instead of reducing complexity of lesson format, let's account for possibility that template of lessons will become increasingly complex. Specifically, we should assume that each section separated by "-----" can have subsections separated by the "----". I think we can program the script so every time it identifies "-----" section it then searches for the "----" sections. I f the next section it ancounters is "-----" section, then it means that there are no subsections. If it encounters "----" section, it means that this section is a subsecion to the previously encountered "-----" section. What do you think?
 
+- here is the example from the generalized lesson_plan_template.txt
 ```
-    def get_response(chain, user_input):
-        response = chain(
-            {"input": user_input, "chat_history": st.session_state.messages[-20:]},
-            include_run_info=True,
-            tags=[current_lesson.filename, selected_lesson_type]
-        )
-        return response
+----- Main Points:
+(List the main points or topics to be covered in the lesson. For each point or topic, provide the following details)
+
+---- First Point/Topic:
+--- **Explanation**: (Provide a detailed explanation of the point/topic)
+--- **Examples**: (Give examples to illustrate the point/topic)
+(Repeat the above structure for each point or topic)
+
+----- Conclusion:
+(Summarize the main points of the lesson and tie them together)
 ```
 
-2.
-```
-    def initialize_state():
-        if st.session_state.get("current_lesson") != selected_lesson_file or st.session_state.get("current_lesson_type") != selected_lesson_type:
-            st.session_state["current_lesson"] = selected_lesson_file
-            st.session_state["current_lesson_type"] = selected_lesson_type
-            welcome_message = f"Once you are prepared, we shall begin our exploration of {selected_lesson_file}. I will be your guide throughout this intellectual journey."
-            st.session_state["messages"] = [AIMessage(content=welcome_message)]
-```
+In this example the Main Points should be recognized as the section, FirstPoint/Topic section should be recognized as subsection of Main Points section, and Explanataion with Examples should be recognized as the (sub)subsections of FirstPoint/Topic subsection. And the loop breaks when it encounters the conclusion section which is recognized as the section on the level equivalent to the Main Points section.
 
-How do I remove this feature? How do I remove the "selected_lesson_type" variable from these sections of the script?
+What do you think? Do you have a better idea?
+
+I think that this can be done by simple loop, by I might be mistaken. If the loop is the simplest solution, propose how to modify the 
+
+```
+        def load_content(self):
+            with open(f"lessons/{self.filename}", "r") as file:
+                content = file.read()
+                lesson_sections = content.split("-----")
+                self.title = lesson_sections[1].strip()
+                self.background_and_prerequisites = lesson_sections[2].strip()
+                self.learning_objectives = lesson_sections[3].strip()
+                self.content_delivery = lesson_sections[4].strip()
+                self.introduction = lesson_sections[5].strip()
+                self.main_points = self.parse_main_points(lesson_sections[6])
+                self.conclusion = lesson_sections[7].strip()
+                self.next_steps = lesson_sections[8].strip()
+```
+part of the script

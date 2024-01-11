@@ -16,10 +16,9 @@
 ----- Main Points:
 (List the main points or topics to be covered in the lesson. For each point or topic, provide the following details)
 
--- First Point/Topic:
-- **Explanation**: (Provide a detailed explanation of the point/topic)
-- **Examples**: (Give examples to illustrate the point/topic)
-- **Applications**: (Propose the current or potential practical applications of the point/topic)
+---- First Point/Topic:
+--- **Explanation**: (Provide a detailed explanation of the point/topic)
+--- **Examples**: (Give examples to illustrate the point/topic)
 (Repeat the above structure for each point or topic)
 
 ----- Conclusion:
