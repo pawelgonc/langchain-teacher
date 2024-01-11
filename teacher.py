@@ -33,6 +33,14 @@ def app():
             self.container.markdown(self.text)
 
     class Lesson:
+        def get_next_section_content(self):
+            if self.active_section_index < len(self.lesson_sections):
+                next_section_title = self.lesson_sections[self.active_section_index]
+                next_section_content = getattr(self, next_section_title)
+                return next_section_title, next_section_content
+            else:
+                return None, None  # No more lesson_sections
+            
         def __init__(self, filename):
             self.filename = filename
             self.lesson_sections = ["title", "background_and_prerequisites", "learning_objectives", "content_delivery", "introduction", "main_points", "conclusion", "next_steps"]
@@ -74,6 +82,9 @@ def app():
                 self.update_current_section()
             else:
                 print(f"Section '{section_title}' not found in lesson.")
+        
+        def get_section_names(self):
+            return self.lesson_sections
 
     def handle_user_input():
         if user_input := st.chat_input():
@@ -82,8 +93,7 @@ def app():
         return None
 
     def get_prompt_template(current_lesson):
-        # Use the general prompt template for the current section
-        prompt_template = load_section_prompt(current_lesson.active_section, getattr(current_lesson, current_lesson.active_section))
+        prompt_template = load_section_prompt(current_lesson)
         return prompt_template
 
     def get_llm_chain(prompt_template):
@@ -162,6 +172,12 @@ def app():
     current_lesson = Lesson(selected_lesson_file)
     # Display the title, background and prerequisites, and learning objectives
     current_lesson.display()
+
+    # Dropdown menu for section selection
+    selected_section = st.sidebar.selectbox("Browse Sections", current_lesson.get_section_names())
+
+    # Display the content of the selected section
+    st.sidebar.markdown(getattr(current_lesson, selected_section))
 
     initialize_state()
 
