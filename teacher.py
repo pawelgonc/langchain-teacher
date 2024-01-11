@@ -33,6 +33,29 @@ def app():
             self.container.markdown(self.text)
 
     class Lesson:
+        def format_section_content(self, content):
+            """
+            Formats the content of the lesson sections, considering only sections separated by '-----'.
+            """
+            # Define the separator string
+            separator = '-----'
+
+            # Split the content into sections by the separator
+            sections = content.split(separator)
+
+            # Initialize an empty string to hold the formatted content
+            formatted_content = ''
+
+            # Iterate over the sections
+            for section in sections:
+                # Strip leading and trailing whitespace from the section
+                section = section.strip()
+
+                # Add the section to the formatted content, followed by a newline
+                formatted_content += f'{section}\n'
+
+            return formatted_content
+
         def get_next_section_content(self):
             if self.active_section_index < len(self.lesson_sections):
                 next_section_title = self.lesson_sections[self.active_section_index]
@@ -168,19 +191,6 @@ def app():
             else:
                 st.chat_message("assistant").write(msg.content)
     
-    def format_section_content(content, separator="----"):
-        formatted_content = ""
-        if isinstance(content, dict):
-            for key, value in content.items():
-                formatted_content += key.replace(separator, "") + "\n"
-                formatted_content += format_section_content(value, separator[:-1])
-        elif isinstance(content, list):
-            for item in content:
-                formatted_content += format_section_content(item, separator)
-        else:  # content is a string
-            formatted_content += content.replace(separator, "") + "\n"
-        return formatted_content
-
     # Initialize LangSmith langsmith_client
     langsmith_client = Client()
 
@@ -199,7 +209,7 @@ def app():
     selected_section = st.sidebar.selectbox("Select Section", current_lesson.get_section_names(), key='section_select')
     # Display the content of the selected section
     section_content = getattr(current_lesson, selected_section)
-    formatted_content = format_section_content(section_content)
+    formatted_content = current_lesson.format_section_content(section_content)
     st.sidebar.markdown(formatted_content)
 
     initialize_state()
