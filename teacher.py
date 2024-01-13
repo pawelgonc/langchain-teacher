@@ -32,15 +32,7 @@ def app():
             self.text += token
             self.container.markdown(self.text)
 
-    class Lesson:
-        def get_next_section_content(self):
-            if self.active_section_index < len(self.lesson_sections):
-                next_section_title = self.lesson_sections[self.active_section_index]
-                next_section_content = getattr(self, next_section_title)
-                return next_section_title, next_section_content
-            else:
-                return None, None  # No more lesson_sections
-            
+    class Lesson:            
         def __init__(self, filename):
             self.filename = filename
             self.lesson_sections = []  # Initialize as empty list
@@ -50,9 +42,11 @@ def app():
         def update_current_section(self):
             if self.active_section_index < len(self.lesson_sections):
                 self.active_section = self.lesson_sections[self.active_section_index]
+                self.active_section_content = getattr(self, self.active_section)
                 self.active_section_index += 1
             else:
                 self.active_section = None  # No more lesson_sections
+                self.active_section_content = None
 
         def load_content(self):
             with open(f"lessons/{self.filename}", "r") as file:
@@ -61,14 +55,10 @@ def app():
                 for i, section in enumerate(sections):
                     section = section.strip()
                     if section:  # Ignore empty sections
-                        if "\n" in section:  # Check if section has a newline
-                            section_title, section_content = section.split("\n", 1)
-                            self.lesson_sections.append(section_title.strip())
-                            setattr(self, section_title.strip(), section_content.strip())
-                        else:
-                            self.lesson_sections.append(section)
-                            setattr(self, section, "")
-
+                        section_title, section_content = section.split("\n", 1)
+                        self.lesson_sections.append(section_title.strip())
+                        setattr(self, section_title.strip(), section_content.strip())
+                        
         def display(self):
             for section_title in self.lesson_sections[:3]:  # Iterate over the first three sections
                 section_content = getattr(self, section_title)
