@@ -16,9 +16,11 @@ The lesson will be delivered in the following sequence:
 Introduction:
 (Briefly introduce the topic and its relevance)
 
-Point/Topic 1:
-- Explanation: (Provide a detailed explanation of the point/topic)
-- Examples: (Give examples to illustrate the point/topic)
+Main Points:
+
+- First Point/Topic:
+Explanation: (Provide a detailed explanation of the point/topic)
+Examples: (Give examples to illustrate the point/topic)
 (Repeat the above structure for each point or topic)
 
 Conclusion:

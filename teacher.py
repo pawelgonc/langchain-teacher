@@ -32,43 +32,55 @@ def app():
             self.text += token
             self.container.markdown(self.text)
 
-    class Lesson:            
+    class Lesson:
+        def get_next_section_content(self):
+            if self.active_section_index < len(self.lesson_sections):
+                next_section_title = self.lesson_sections[self.active_section_index]
+                next_section_content = getattr(self, next_section_title)
+                return next_section_title, next_section_content
+            else:
+                return None, None  # No more lesson_sections
+            
         def __init__(self, filename):
             self.filename = filename
             self.lesson_sections = []  # Initialize as empty list
             self.active_section_index = 0
             self.load_content()
 
-        def load_content(self):
-            content = self.read_file()
-            self.split_content(content)
-
-        def read_file(self):
-            with open(f"lessons/{self.filename}", "r") as file:
-                return file.read()
-        
-        def split_content(self, content):
-            sections = content.split("\n\n")  # Use double newline as separator
-            for section in sections:
-                section = section.strip()
-                if section:  # Ignore empty sections
-                    section_title, section_content = section.split("\n", 1)
-                    self.lesson_sections.append(section_title.strip())
-                    setattr(self, section_title.strip(), section_content.strip())
-
-        def set_section(self, section_title=None):
-            if section_title:
-                if section_title in self.lesson_sections:
-                    self.active_section_index = self.lesson_sections.index(section_title)
-                else:
-                    print(f"Section '{section_title}' not found in lesson.")
+        def update_current_section(self):
             if self.active_section_index < len(self.lesson_sections):
                 self.active_section = self.lesson_sections[self.active_section_index]
-                self.active_section_content = getattr(self, self.active_section)
                 self.active_section_index += 1
             else:
                 self.active_section = None  # No more lesson_sections
-                self.active_section_content = None
+
+        def load_content(self):
+            with open(f"lessons/{self.filename}", "r") as file:
+                content = file.read()
+                sections = content.split("\n\n")  # Use double newline as separator
+                for i, section in enumerate(sections):
+                    section = section.strip()
+                    if section:  # Ignore empty sections
+                        if "\n" in section:  # Check if section has a newline
+                            section_title, section_content = section.split("\n", 1)
+                            self.lesson_sections.append(section_title.strip())
+                            setattr(self, section_title.strip(), section_content.strip())
+                        else:
+                            self.lesson_sections.append(section)
+                            setattr(self, section, "")
+
+        def display(self):
+            for section_title in self.lesson_sections[:3]:  # Iterate over the first three sections
+                section_content = getattr(self, section_title)
+                st.markdown(f"**{section_title}**")
+                st.write(section_content)
+
+        def set_section(self, section_title):
+            if section_title in self.lesson_sections:
+                self.active_section_index = self.lesson_sections.index(section_title)
+                self.update_current_section()
+            else:
+                print(f"Section '{section_title}' not found in lesson.")
 
         def get_section_names(self):
             return self.lesson_sections
@@ -154,6 +166,8 @@ def app():
 
     # Create a new Lesson object
     current_lesson = Lesson(selected_lesson_file)
+    # Display the title, background and prerequisites, and learning objectives
+    current_lesson.display()
 
     # Dropdown menu for section selection
     selected_section = st.sidebar.selectbox("Select Section", current_lesson.get_section_names(), key='section_select')
