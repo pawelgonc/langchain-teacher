@@ -69,12 +69,6 @@ def app():
                             self.lesson_sections.append(section)
                             setattr(self, section, "")
 
-        def display(self):
-            for section_title in self.lesson_sections[:3]:  # Iterate over the first three sections
-                section_content = getattr(self, section_title)
-                st.markdown(f"**{section_title}**")
-                st.write(section_content)
-
         def set_section(self, section_title):
             if section_title in self.lesson_sections:
                 self.active_section_index = self.lesson_sections.index(section_title)
@@ -166,8 +160,6 @@ def app():
 
     # Create a new Lesson object
     current_lesson = Lesson(selected_lesson_file)
-    # Display the title, background and prerequisites, and learning objectives
-    current_lesson.display()
 
     # Dropdown menu for section selection
     selected_section = st.sidebar.selectbox("Select Section", current_lesson.get_section_names(), key='section_select')
