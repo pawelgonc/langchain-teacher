@@ -55,20 +55,27 @@ def app():
             else:
                 self.active_section = None  # No more lesson_sections
 
-        def load_content(self):
+        def load_data(self):
             with open(f"lessons/{self.filename}", "r") as file:
                 content = file.read()
-                sections = content.split("\n\n")  # Use double newline as separator
-                for i, section in enumerate(sections):
-                    section = section.strip()
-                    if section:  # Ignore empty sections
-                        if "\n" in section:  # Check if section has a newline
-                            section_title, section_content = section.split("\n", 1)
-                            self.lesson_sections.append(section_title.strip())
-                            setattr(self, section_title.strip(), section_content.strip())
-                        else:
-                            self.lesson_sections.append(section)
-                            setattr(self, section, "")
+            return content
+
+        def parse_data(self, content):
+            sections = content.split("\n\n")  # Use double newline as separator
+            for i, section in enumerate(sections):
+                section = section.strip()
+                if section:  # Ignore empty sections
+                    if "\n" in section:  # Check if section has a newline
+                        section_title, section_content = section.split("\n", 1)
+                        self.lesson_sections.append(section_title.strip())
+                        setattr(self, section_title.strip(), section_content.strip())
+                    else:
+                        self.lesson_sections.append(section)
+                        setattr(self, section, "")
+
+        def load_content(self):
+            content = self.load_data()
+            self.parse_data(content)
 
         def set_section(self, section_title):
             if section_title in self.lesson_sections:
