@@ -1,28 +1,26 @@
 
-Lesson Title:
-(Provide a brief, descriptive title for the lesson)
+Lesson Title
+(Prompt the user to provide a brief, descriptive title for the lesson)
 
-Background and Prerequisites:
-(Provide any necessary background knowledge, context, or skills that you should have before starting this lesson. This could include both the contextual information related to the topic and any prerequisite knowledge or skills needed to understand and engage with the lesson)
+Background and Prerequisites
+(Prompt the user to provide any necessary background knowledge, context, or skills that a learner should have before starting this lesson. This could include both the contextual information related to the topic and any prerequisite knowledge or skills needed to understand and engage with the lesson)
 
-Learning Objectives:
-By the end of this lesson, you should be able to:
-1. (Clearly define what you should know or be able to do by the end of the lesson)
+Learning Objectives
+(Prompt the user to define what learner should know or be able to do by the end of the lesson)
 
-Content Delivery:
-The lesson will be delivered in the following sequence:
-1. (Outline the main content points and the sequence in which they should be delivered. This could be in the form of a detailed script, a list of topics, or a combination of both)
+Content Delivery
+(Prompt the user to outline the main content points and the sequence in which they should be delivered. This could be in the form of a detailed script, a list of topics, or a combination of both)
 
-Introduction:
-(Briefly introduce the topic and its relevance)
+Introduction
+(Prompt the user to briefly introduce the topic and its relevance)
 
-Point/Topic 1:
-- Explanation: (Provide a detailed explanation of the point/topic)
-- Examples: (Give examples to illustrate the point/topic)
+Point/Topic 1
+- Explanation: (Prompt the user to provide an explanation of the point/topic)
+- Examples: (Prompt the user to give examples to illustrate the point/topic)
 (Repeat the above structure for each point or topic)
 
-Conclusion:
-(Summarize the main points of the lesson and tie them together)
+Conclusion
+(Prompt the user to summarize the main points of the lesson and tie them together)
 
-Next Steps:
-(Describe what should be done next, such as homework, further reading, or preparation for the next lesson. Also, propose recent scientific discoveries that relate to the lesson and might expand or specify the information from this lesson)
+Next Steps
+(Prompt the user to describe what should be done next, such as homework, further reading, or preparation for the next lesson. Also, prompt the user to propose recent scientific discoveries that might expand or specify the knowledge gained from this lesson by the learner)
