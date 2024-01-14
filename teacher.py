@@ -154,6 +154,13 @@ def app():
             else:
                 st.chat_message("assistant").write(msg.content)
     
+    def update_session_state(session_state, selected_lesson_file, active_section):
+        if session_state["current_lesson"] is None or session_state["current_lesson"].filename != selected_lesson_file:
+            session_state["current_lesson"] = Lesson(selected_lesson_file)
+            session_state["current_lesson"].update_current_section()  # Update current_section immediately
+        if session_state["current_section"] is None or (session_state["current_lesson"].active_section is not None and session_state["current_section"] != session_state["current_lesson"].active_section):
+            session_state["current_section"] = session_state["current_lesson"].active_section
+
     # Initialize LangSmith langsmith_client
     langsmith_client = Client()
 
@@ -161,11 +168,7 @@ def app():
     selected_lesson_file = st.sidebar.selectbox("Select Lesson", os.listdir("lessons"))
 
     # Create a new Lesson object
-    if st.session_state["current_lesson"] is None or st.session_state["current_lesson"].filename != selected_lesson_file:
-        st.session_state["current_lesson"] = Lesson(selected_lesson_file)
-        st.session_state["current_lesson"].update_current_section()  # Update current_section immediately
-    if st.session_state["current_section"] is None or (st.session_state["current_lesson"].active_section is not None and st.session_state["current_section"] != st.session_state["current_lesson"].active_section):
-        st.session_state["current_section"] = st.session_state["current_lesson"].active_section
+    update_session_state(st.session_state, selected_lesson_file, st.session_state["current_section"])
 
     # Dropdown menu for section selection
     selected_section = st.sidebar.selectbox("Select Section", st.session_state["current_lesson"].get_section_names(), key='section_select')
