@@ -56,7 +56,7 @@ def app():
                 self.active_section = None  # No more lesson_sections
 
         def load_data(self):
-            with open(f"lessons/{self.filename}", "r") as file:
+            with open(f"templates/{self.filename}", "r") as file:
                 content = file.read()
             return content
 
@@ -82,7 +82,7 @@ def app():
                 self.active_section_index = self.lesson_sections.index(section_title)
                 self.update_current_section()
             else:
-                print(f"Section '{section_title}' not found in lesson.")
+                print(f"Section '{section_title}' not found in template.")
 
         def get_section_names(self):
             return self.lesson_sections
@@ -172,7 +172,7 @@ def app():
     langsmith_client = Client()
 
     # Lesson selection sidebar
-    selected_lesson_file = st.sidebar.selectbox("Select Lesson", os.listdir("lessons"))
+    selected_lesson_file = st.sidebar.selectbox("Select Template", os.listdir("templates"))
 
     # Create a new Lesson object
     update_session_state(st.session_state, selected_lesson_file, st.session_state["creator_current_section"])
