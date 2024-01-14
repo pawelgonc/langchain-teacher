@@ -93,8 +93,8 @@ def app():
             return user_input
         return None
 
-    def get_prompt_template(current_lesson):
-        prompt_template = load_section_prompt(st.session_state["current_lesson"])
+    def get_prompt_template(teacher_current_lesson):
+        prompt_template = load_section_prompt(st.session_state["teacher_current_lesson"])
         return prompt_template
 
     def get_llm_chain(prompt_template):
@@ -107,7 +107,7 @@ def app():
         response = chain(
             {"input": user_input, "chat_history": st.session_state.messages[-20:]},
             include_run_info=True,
-            tags=[st.session_state["current_lesson"].filename]  # removed selected_lesson_type
+            tags=[st.session_state["teacher_current_lesson"].filename]  # removed selected_lesson_type
         )
         return response
 
@@ -115,17 +115,17 @@ def app():
         st.session_state.messages.append(HumanMessage(content=user_input))
         st.session_state.messages.append(AIMessage(content=response[chain.output_key]))
 
-    def handle_assistant_response(user_input, current_lesson):
+    def handle_assistant_response(user_input, teacher_current_lesson):
         # Check if the user's input contains a command to switch sections
         if user_input.startswith("switch to "):
             section_title = user_input[len("switch to "):]
-            st.session_state["current_lesson"].set_section(section_title)
+            st.session_state["teacher_current_lesson"].set_section(section_title)
         else:
-            st.session_state["current_lesson"].update_current_section()  # Update current_section before using it
-            st.session_state["current_section"] = st.session_state["current_lesson"].active_section
+            st.session_state["teacher_current_lesson"].update_current_section()  # Update teacher_current_section before using it
+            st.session_state["teacher_current_section"] = st.session_state["teacher_current_lesson"].active_section
 
         with st.chat_message("assistant"):
-            prompt_template = get_prompt_template(st.session_state["current_lesson"])
+            prompt_template = get_prompt_template(st.session_state["teacher_current_lesson"])
             chain = get_llm_chain(prompt_template)
             response = get_response(chain, user_input)
             update_messages(user_input, response, chain)
@@ -145,8 +145,8 @@ def app():
             st.button("👎", on_click=send_feedback, args=(run_id, 0))
 
     def initialize_state():
-        if st.session_state.get("current_lesson_file") != selected_lesson_file:
-            st.session_state["current_lesson_file"] = selected_lesson_file
+        if st.session_state.get("teacher_current_lesson_file") != selected_lesson_file:
+            st.session_state["teacher_current_lesson_file"] = selected_lesson_file
             welcome_message = f"Once you are prepared, we shall begin our exploration of {selected_lesson_file}. I will be your guide throughout this intellectual journey."
             st.session_state["messages"] = [AIMessage(content=welcome_message)]
 
@@ -162,11 +162,11 @@ def app():
                 st.chat_message("assistant").write(msg.content)
     
     def update_session_state(session_state, selected_lesson_file, active_section):
-        if session_state["current_lesson"] is None or session_state["current_lesson"].filename != selected_lesson_file:
-            session_state["current_lesson"] = Lesson(selected_lesson_file)
-            session_state["current_lesson"].update_current_section()  # Update current_section immediately
-        if session_state["current_section"] is None or (session_state["current_lesson"].active_section is not None and session_state["current_section"] != session_state["current_lesson"].active_section):
-            session_state["current_section"] = session_state["current_lesson"].active_section
+        if session_state["teacher_current_lesson"] is None or session_state["teacher_current_lesson"].filename != selected_lesson_file:
+            session_state["teacher_current_lesson"] = Lesson(selected_lesson_file)
+            session_state["teacher_current_lesson"].update_current_section()  # Update teacher_current_section immediately
+        if session_state["teacher_current_section"] is None or (session_state["teacher_current_lesson"].active_section is not None and session_state["teacher_current_section"] != session_state["teacher_current_lesson"].active_section):
+            session_state["teacher_current_section"] = session_state["teacher_current_lesson"].active_section
 
     # Initialize LangSmith langsmith_client
     langsmith_client = Client()
@@ -175,12 +175,12 @@ def app():
     selected_lesson_file = st.sidebar.selectbox("Select Lesson", os.listdir("lessons"))
 
     # Create a new Lesson object
-    update_session_state(st.session_state, selected_lesson_file, st.session_state["current_section"])
+    update_session_state(st.session_state, selected_lesson_file, st.session_state["teacher_current_section"])
 
     # Dropdown menu for section selection
-    selected_section = st.sidebar.selectbox("Select Section", st.session_state["current_lesson"].get_section_names(), key='section_select')
+    selected_section = st.sidebar.selectbox("Select Section", st.session_state["teacher_current_lesson"].get_section_names(), key='section_select')
     # Get the content of the selected section
-    section_content = getattr(st.session_state["current_lesson"], selected_section)
+    section_content = getattr(st.session_state["teacher_current_lesson"], selected_section)
     # Display the content in the sidebar
     st.sidebar.markdown(section_content)
 
@@ -190,4 +190,4 @@ def app():
 
     # Handle user input and assistant responses
     if user_input := handle_user_input():
-        handle_assistant_response(user_input, st.session_state["current_lesson"])
+        handle_assistant_response(user_input, st.session_state["teacher_current_lesson"])

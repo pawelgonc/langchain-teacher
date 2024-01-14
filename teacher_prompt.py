@@ -2,13 +2,13 @@ from langchain.prompts import ChatPromptTemplate, MessagesPlaceholder, HumanMess
 from langchain.schema import SystemMessage
 from langchain.memory import ConversationBufferMemory
 
-def load_section_prompt(current_lesson):
-    section_title = current_lesson.active_section
-    content = getattr(current_lesson, current_lesson.active_section)
-    next_section_title, next_section_content = current_lesson.get_next_section_content()
+def load_section_prompt(teacher_current_lesson):
+    section_title = teacher_current_lesson.active_section
+    content = getattr(teacher_current_lesson, teacher_current_lesson.active_section)
+    next_section_title, next_section_content = teacher_current_lesson.get_next_section_content()
 
     template = f"""
-    You are an educator, and you are currently teaching the '{section_title}' section of the lesson. Your task is to guide the user through this section, encouraging them to progress when appropriate. Limit any responses to only one concept or step per prompt.
+    You are an educator, and you are currently teaching the '{section_title}' section of the lesson. Your task is to guide the user through this section. Limit any responses to only one concept or step per prompt.
 
     Here is the content of this section:
 

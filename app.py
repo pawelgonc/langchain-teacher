@@ -13,18 +13,25 @@ PAGES = {
 }
 
 def main():
-    # Initialize the session state for 'Teacher', 'Lesson Creator', and 'Lesson Plan'
+    # Initialize the session state for 'Teacher'
     if "teacher" not in st.session_state:
         st.session_state.teacher = {}
-    if "lesson_creator" not in st.session_state:
-        st.session_state.creator = {}
-    if "current_lesson" not in st.session_state:
-        st.session_state["current_lesson"] = None
-    if "current_section" not in st.session_state:
-        st.session_state["current_section"] = None
-    if "current_lesson_file" not in st.session_state:
-        st.session_state["current_lesson_file"] = None
+    if "teacher_current_lesson" not in st.session_state:
+        st.session_state["teacher_current_lesson"] = None
+    if "teacher_current_section" not in st.session_state:
+        st.session_state["teacher_current_section"] = None
+    if "teacher_current_lesson_file" not in st.session_state:
+        st.session_state["teacher_current_lesson_file"] = None
 
+    # Initialize the session state for 'Creator'
+    if "creator" not in st.session_state:
+        st.session_state.creator = {}
+    if "creator_current_lesson" not in st.session_state:
+        st.session_state["creator_current_lesson"] = None
+    if "creator_current_section" not in st.session_state:
+        st.session_state["creator_current_section"] = None
+    if "creator_current_lesson_file" not in st.session_state:
+        st.session_state["creator_current_lesson_file"] = None
 
     st.sidebar.title('Navigation')
     selection = st.sidebar.radio("Go to", list(PAGES.keys()))

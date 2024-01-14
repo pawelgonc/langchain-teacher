@@ -2,31 +2,32 @@ from langchain.prompts import ChatPromptTemplate, MessagesPlaceholder, HumanMess
 from langchain.schema import SystemMessage
 from langchain.memory import ConversationBufferMemory
 
-#Here are the tasks you must complete:
-#1. Identify the topic, concept, or phenomenon that the user is interested in.
-#2. Identify the user's knowledge gaps regarding their specified area of interest.
-#3. Create a lesson plan that fills these gaps and does not include concepts the user is already familiar with.
+def load_section_prompt(creator_current_lesson):
+    section_title = creator_current_lesson.active_section
+    content = getattr(creator_current_lesson, creator_current_lesson.active_section)
+    next_section_title, next_section_content = creator_current_lesson.get_next_section_content()
 
-#Structure of the lesson plan:
-#Begin with the headline LESSON_PLAN_START.
-#Include the following sections in order: Lesson Title, Background and Prerequisites, Learning Objectives, Content Delivery (Outline the main content points and the sequence in which they should be delivered. This could be in the form of a detailed script, a list of topics, or a combination of both), Introduction, Main Points (The main topics or points covered in the lesson. This section should contain at least one "Point/Topic" section), Point/Topic (Each point or topic should have an "Explanation", "Examples", and "Applications" sections), Conclusion (A summary of the main points of the lesson and relations between them), and Next Steps (Description of what should be done next to expand or specify the knowledge gained from this lesson. This could be in the form of a homework, further reading, or recent recent scientific discoveries that relate to the lesson)
-#End the lesson plan with the footnote LESSON_PLAN_END.
-
-#The created lesson plan will be an output to the AI, therefore it must be written as a command or prompt.
-def load_lesson_plan_prompt():
     template = f"""
-    Your task is to create a lesson plan. If the user has not specified a topic, ask them for one. Otherwise, create a lesson plan for the topic or phenomenon of the user's choice.
-    
-    LESSON_PLAN_START
-    Lesson plan must contain these sections in this order: Lesson Title, Background and Prerequisites, Learning Objectives, Content Delivery, Introduction, Main Points, Conclusion, and Next Steps.
-    
-    Additionally, the "Main Points" section must contain at least one "Point/Topic" section. Moreover, each "Point/Topic" section must contain the "Explanation", "Examples", and "Applications" sections.
-    LESSON_PLAN_END
+    You are a lesson plan creator, and you are currently creating the '{section_title}' section of the lesson. Your task is to guide the user through this section. Limit any responses to only one concept or step per prompt.
+
+    Here is the content of this section:
+
+    {content}
     """
+
+    if next_section_title and next_section_content:
+        template += f"""
+
+        Looking ahead, the next section will be '{next_section_title}'. Here is a preview of the content:
+
+        {next_section_content}
+
+        Please ensure that the user is ready to move on to this next section.
+        """
 
     prompt_template = ChatPromptTemplate(messages = [
         SystemMessage(content=template), 
         MessagesPlaceholder(variable_name="chat_history"), 
         HumanMessagePromptTemplate.from_template("{input}")
-        ])
+    ])
     return prompt_template
