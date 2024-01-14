@@ -8,9 +8,8 @@ def load_section_prompt(creator_current_lesson):
     next_section_title, next_section_content = creator_current_lesson.get_next_section_content()
 
     template = f"""
-    You are a lesson plan creator, and you are currently creating the '{section_title}' section of the lesson. Your task is to guide the user through this section. Limit any responses to only one concept or step per prompt.
-
-    Here is the content of this section:
+    You are a lesson plan creator, and you are currently creating the '{section_title}' section of the lesson. Your task is to prompt the user for details regarding content of this section.
+    Here is the instruction specific to this section:
 
     {content}
     """
