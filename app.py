@@ -18,8 +18,13 @@ def main():
         st.session_state.teacher = {}
     if "lesson_creator" not in st.session_state:
         st.session_state.creator = {}
-    if "lesson_plan" not in st.session_state:
-        st.session_state.lesson_plan = ""
+    if "current_lesson" not in st.session_state:
+        st.session_state["current_lesson"] = None
+    if "current_section" not in st.session_state:
+        st.session_state["current_section"] = None
+    if "current_lesson_file" not in st.session_state:
+        st.session_state["current_lesson_file"] = None
+
 
     st.sidebar.title('Navigation')
     selection = st.sidebar.radio("Go to", list(PAGES.keys()))

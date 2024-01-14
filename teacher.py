@@ -45,6 +45,7 @@ def app():
             self.filename = filename
             self.lesson_sections = []  # Initialize as empty list
             self.active_section_index = 0
+            self.active_section = None  # Initialize active_section attribute
             self.load_content()
 
         def update_current_section(self):
@@ -86,7 +87,7 @@ def app():
         return None
 
     def get_prompt_template(current_lesson):
-        prompt_template = load_section_prompt(current_lesson)
+        prompt_template = load_section_prompt(st.session_state["current_lesson"])
         return prompt_template
 
     def get_llm_chain(prompt_template):
@@ -99,7 +100,7 @@ def app():
         response = chain(
             {"input": user_input, "chat_history": st.session_state.messages[-20:]},
             include_run_info=True,
-            tags=[current_lesson.filename]  # removed selected_lesson_type
+            tags=[st.session_state["current_lesson"].filename]  # removed selected_lesson_type
         )
         return response
 
@@ -111,12 +112,13 @@ def app():
         # Check if the user's input contains a command to switch sections
         if user_input.startswith("switch to "):
             section_title = user_input[len("switch to "):]
-            current_lesson.set_section(section_title)
+            st.session_state["current_lesson"].set_section(section_title)
         else:
-            current_lesson.update_current_section()  # Update current_section before using it
+            st.session_state["current_lesson"].update_current_section()  # Update current_section before using it
+            st.session_state["current_section"] = st.session_state["current_lesson"].active_section
 
         with st.chat_message("assistant"):
-            prompt_template = get_prompt_template(current_lesson)
+            prompt_template = get_prompt_template(st.session_state["current_lesson"])
             chain = get_llm_chain(prompt_template)
             response = get_response(chain, user_input)
             update_messages(user_input, response, chain)
@@ -136,8 +138,8 @@ def app():
             st.button("👎", on_click=send_feedback, args=(run_id, 0))
 
     def initialize_state():
-        if st.session_state.get("current_lesson") != selected_lesson_file:
-            st.session_state["current_lesson"] = selected_lesson_file
+        if st.session_state.get("current_lesson_file") != selected_lesson_file:
+            st.session_state["current_lesson_file"] = selected_lesson_file
             welcome_message = f"Once you are prepared, we shall begin our exploration of {selected_lesson_file}. I will be your guide throughout this intellectual journey."
             st.session_state["messages"] = [AIMessage(content=welcome_message)]
 
@@ -159,12 +161,16 @@ def app():
     selected_lesson_file = st.sidebar.selectbox("Select Lesson", os.listdir("lessons"))
 
     # Create a new Lesson object
-    current_lesson = Lesson(selected_lesson_file)
+    if st.session_state["current_lesson"] is None or st.session_state["current_lesson"].filename != selected_lesson_file:
+        st.session_state["current_lesson"] = Lesson(selected_lesson_file)
+        st.session_state["current_lesson"].update_current_section()  # Update current_section immediately
+    if st.session_state["current_section"] is None or (st.session_state["current_lesson"].active_section is not None and st.session_state["current_section"] != st.session_state["current_lesson"].active_section):
+        st.session_state["current_section"] = st.session_state["current_lesson"].active_section
 
     # Dropdown menu for section selection
-    selected_section = st.sidebar.selectbox("Select Section", current_lesson.get_section_names(), key='section_select')
+    selected_section = st.sidebar.selectbox("Select Section", st.session_state["current_lesson"].get_section_names(), key='section_select')
     # Get the content of the selected section
-    section_content = getattr(current_lesson, selected_section)
+    section_content = getattr(st.session_state["current_lesson"], selected_section)
     # Display the content in the sidebar
     st.sidebar.markdown(section_content)
 
@@ -174,4 +180,4 @@ def app():
 
     # Handle user input and assistant responses
     if user_input := handle_user_input():
-        handle_assistant_response(user_input, current_lesson)
+        handle_assistant_response(user_input, st.session_state["current_lesson"])
