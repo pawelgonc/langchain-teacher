@@ -182,7 +182,7 @@ def app():
     update_session_state(st.session_state, selected_lesson_file, st.session_state["teacher_current_section"])
 
     # Dropdown menu for section selection
-    selected_section = st.sidebar.selectbox("Select Section", st.session_state["teacher_current_lesson"].get_section_names(), key='section_select')
+    selected_section = st.sidebar.selectbox("Section Preview", st.session_state["teacher_current_lesson"].get_section_names(), key='section_select')
     # Get the content of the selected section
     section_content = getattr(st.session_state["teacher_current_lesson"], selected_section)
     # Display the content in the sidebar

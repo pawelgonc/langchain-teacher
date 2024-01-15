@@ -6,7 +6,7 @@ def load_section_prompt(teacher_current_lesson):
     section_title = teacher_current_lesson.active_section
     content = getattr(teacher_current_lesson, teacher_current_lesson.active_section)
 
-    print(f"Loading section '{section_title}' into teacher_prompt.")
+    print(f"Loading section '{section_title}' into teacher_prompt.") #debugg
 
     template = f"""
     You are an educator, and you are currently teaching the '{section_title}' section of the lesson. Your task is to guide the user through this section. Limit any responses to only one concept or step per prompt.

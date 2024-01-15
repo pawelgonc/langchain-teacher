@@ -50,10 +50,12 @@ def app():
 
         def update_current_section(self):
             if self.active_section_index < len(self.lesson_sections):
+                print(f"Updating section from '{self.active_section}' to '{self.lesson_sections[self.active_section_index]}'") #debugg
                 self.active_section = self.lesson_sections[self.active_section_index]
                 self.active_section_index += 1
             else:
                 self.active_section = None  # No more lesson_sections
+                print("No more sections to update.") #debugg
 
         def load_data(self):
             with open(f"templates/{self.filename}", "r") as file:
@@ -79,6 +81,7 @@ def app():
 
         def set_section(self, section_title):
             if section_title in self.lesson_sections:
+                print(f"Switching section from '{self.active_section}' to '{section_title}'") #debugg
                 self.active_section_index = self.lesson_sections.index(section_title)
                 self.update_current_section()
             else:
@@ -120,7 +123,7 @@ def app():
         if user_input.startswith("switch to "):
             section_title = user_input[len("switch to "):]
             st.session_state["creator_current_lesson"].set_section(section_title)
-        else:
+        elif user_input == "next section":
             st.session_state["creator_current_lesson"].update_current_section()  # Update creator_current_section before using it
             st.session_state["creator_current_section"] = st.session_state["creator_current_lesson"].active_section
 
@@ -147,7 +150,7 @@ def app():
     def initialize_state():
         if st.session_state.get("creator_current_lesson_file") != selected_lesson_file:
             st.session_state["creator_current_lesson_file"] = selected_lesson_file
-            welcome_message = f"Once you are prepared, we shall begin our exploration of {selected_lesson_file}. I will be your guide throughout this intellectual journey."
+            welcome_message = f"Once you are prepared, we shall begin creating a lesson plan based on {selected_lesson_file}. I will be your guide."
             st.session_state["messages"] = [AIMessage(content=welcome_message)]
 
     # Message handling and interaction
@@ -178,7 +181,7 @@ def app():
     update_session_state(st.session_state, selected_lesson_file, st.session_state["creator_current_section"])
 
     # Dropdown menu for section selection
-    selected_section = st.sidebar.selectbox("Select Section", st.session_state["creator_current_lesson"].get_section_names(), key='section_select')
+    selected_section = st.sidebar.selectbox("Section Preview", st.session_state["creator_current_lesson"].get_section_names(), key='section_select')
     # Get the content of the selected section
     section_content = getattr(st.session_state["creator_current_lesson"], selected_section)
     # Display the content in the sidebar
