@@ -50,10 +50,12 @@ def app():
 
         def update_current_section(self):
             if self.active_section_index < len(self.lesson_sections):
+                print(f"Updating section from '{self.active_section}' to '{self.lesson_sections[self.active_section_index]}'") #debugg
                 self.active_section = self.lesson_sections[self.active_section_index]
                 self.active_section_index += 1
             else:
                 self.active_section = None  # No more lesson_sections
+                print("No more sections to update.") #debugg
 
         def load_data(self):
             with open(f"lessons/{self.filename}", "r") as file:
@@ -79,6 +81,7 @@ def app():
 
         def set_section(self, section_title):
             if section_title in self.lesson_sections:
+                print(f"Switching section from '{self.active_section}' to '{section_title}'") #debugg
                 self.active_section_index = self.lesson_sections.index(section_title)
                 self.update_current_section()
             else:
@@ -120,7 +123,7 @@ def app():
         if user_input.startswith("switch to "):
             section_title = user_input[len("switch to "):]
             st.session_state["teacher_current_lesson"].set_section(section_title)
-        else:
+        elif user_input == "next section":
             st.session_state["teacher_current_lesson"].update_current_section()  # Update teacher_current_section before using it
             st.session_state["teacher_current_section"] = st.session_state["teacher_current_lesson"].active_section
 
@@ -132,6 +135,7 @@ def app():
             run_id = response["__run"].run_id
 
             display_feedback_buttons(run_id)  # Display feedback buttons after assistant's response
+
 
     def display_feedback_buttons(run_id):
         col_blank, col_text, col1, col2 = st.columns([10, 2, 1, 1])
