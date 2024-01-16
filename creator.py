@@ -33,6 +33,49 @@ def app():
             self.container.markdown(self.text)
 
     class Lesson:
+        def initialize_lesson_file(self):
+            self.lesson_content = ""  # Initialize an empty string to represent the .txt file
+            print("Initialized lesson file.")  # Debugging print statement
+
+        def add_section(self, section_content):
+            # Get the current section title from the lesson plan template
+            section_title = self.lesson_sections[self.active_section_index]
+            # Add two newline inserts for section separation
+            self.lesson_content.append("\n\n")
+            # Add the section title and a newline insert to separate it from its content
+            self.lesson_content.append(section_title + "\n")
+            # Add the section content
+            self.lesson_content.append(section_content)
+            print(f"Added section: {section_title}")  # Debugging print statement
+
+        def save_lesson(self):
+            # Join the list of strings into a single string
+            lesson_str = "".join(self.lesson_content)
+            # Write the string to a .txt file in the 'lessons' directory
+            with open(os.path.join("lessons", self.filename), "w") as file:
+                file.write(lesson_str)
+            print(f"Saved lesson to file: {self.filename}")  # Debugging print statement
+
+        def get_current_section(self):
+            # Get the current section title and content
+            section_title = self.active_section
+            section_content = getattr(self, self.active_section)
+            # Return a formatted string
+            return f"**Section Title:**\n```\n{section_title}\n```\n**Section Content:**\n```\n{section_content}\n```"
+
+        def handle_next_section(self, user_input):
+            # Treat the user's input as the content for the current section
+            section_content = user_input
+            # Add the section to the lesson content
+            self.add_section(section_content)
+            # Save the lesson content to a .txt file
+            self.save_lesson()
+            # Move to the next section
+            self.active_section_index += 1
+            # Print the current section
+            print(st.session_state["creator_current_lesson"].get_current_section())
+
+
         def get_next_section_content(self):
             if self.active_section_index < len(self.lesson_sections):
                 next_section_title = self.lesson_sections[self.active_section_index]

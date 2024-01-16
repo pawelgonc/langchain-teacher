@@ -34,8 +34,19 @@ def main():
         st.session_state["creator_current_lesson_file"] = None
 
     st.sidebar.title('Navigation')
-    selection = st.sidebar.radio("Go to", list(PAGES.keys()))
-    page = PAGES[selection]
+    
+    # Get the current page selection
+    current_selection = st.sidebar.radio("Go to", list(PAGES.keys()))
+    
+    # Check if the page selection has changed
+    if st.session_state.get("current_selection") != current_selection:
+        # If the selection has changed, clear the messages
+        st.session_state["messages"] = []
+        # Update the current selection
+        st.session_state["current_selection"] = current_selection
+
+    # Load the selected page
+    page = PAGES[current_selection]
     page.app()
 
 if __name__ == "__main__":
