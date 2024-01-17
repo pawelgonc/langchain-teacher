@@ -1,4 +1,3 @@
-
 from dotenv import load_dotenv
 load_dotenv()
 import streamlit as st
@@ -11,7 +10,6 @@ from langchain.memory import ConversationBufferMemory
 from langchain.chains import LLMChain
 import os
 from creator_prompt import load_section_prompt
-import time
 
 def app():
     st.title('Creator')
@@ -34,34 +32,29 @@ def app():
             self.container.markdown(self.text)
 
     class Lesson:
-        def initialize_lesson_file(self, section_content):
-            # Set the filename to the content of the section that is being saved
-            self.lesson_filename = section_content.replace(" ", "_") + ".txt"
-            # Initialize an empty string to represent the .txt file
-            self.lesson_content = ""
-            # Create an actual file in the 'lessons' directory
-            with open(os.path.join("lessons", self.lesson_filename), "w") as file:
-                file.write(self.lesson_content)
+        def initialize_lesson_file(self):
+            self.lesson_content = ""  # Initialize an empty string to represent the .txt file
             print("Initialized lesson file.")  # Debugging print statement
 
         def add_section(self, section_content):
-            # Print the section content for debugging
-            print(f"Section content: {section_content}")
+            print(f"Section content: {section_content}") # Debugging print statement 
             # Get the current section title from the lesson plan template
             section_title = self.lesson_sections[self.active_section_index]
             # Add two newline inserts for section separation
-            self.lesson_content += "\n\n"
+            self.lesson_content.append("\n\n")
             # Add the section title and a newline insert to separate it from its content
-            self.lesson_content += section_title + "\n"
+            self.lesson_content.append(section_title + "\n")
             # Add the section content
-            self.lesson_content += section_content
+            self.lesson_content.append(section_content)
             print(f"Added section: {section_title}")  # Debugging print statement
 
         def save_lesson(self):
+            # Join the list of strings into a single string
+            lesson_str = "".join(self.lesson_content)
             # Write the string to a .txt file in the 'lessons' directory
-            with open(os.path.join("lessons", self.lesson_filename), "w") as file:
-                file.write(self.lesson_content)
-            print(f"Saved lesson to file: {self.lesson_filename}")  # Debugging print statement
+            with open(os.path.join("lessons", self.filename), "w") as file:
+                file.write(lesson_str)
+            print(f"Saved lesson to file: {self.filename}")  # Debugging print statement
 
         def get_current_section(self):
             # Get the current section title and content
@@ -70,14 +63,34 @@ def app():
             # Return a formatted string
             return f"**Section Title:**\n```\n{section_title}\n```\n**Section Content:**\n```\n{section_content}\n```"
 
-        def __init__(self, template_filename):
-            self.template_filename = template_filename
-            self.lesson_filename = None  # Initialize lesson_filename as None
+        def handle_next_section(self, user_input):
+            print(f"Handling 'next section' command. Current section: {self.active_section}")  # Debugging print statement
+            # Treat the user's input as the content for the current section
+            section_content = user_input
+            # Add the section to the lesson content
+            self.add_section(section_content)
+            # Save the lesson content to a .txt file
+            self.save_lesson()
+            # Move to the next section
+            self.active_section_index += 1
+            # Print the current section
+            print(st.session_state["creator_current_lesson"].get_current_section())
+            print(f"After handling 'next section' command. Current section: {self.active_section}")  # Debugging print statement
+
+
+        def get_next_section_content(self):
+            if self.active_section_index < len(self.lesson_sections):
+                next_section_title = self.lesson_sections[self.active_section_index]
+                next_section_content = getattr(self, next_section_title)
+                return next_section_title, next_section_content
+            else:
+                return None, None  # No more lesson_sections
+            
+        def __init__(self, filename):
+            self.filename = filename
             self.lesson_sections = []  # Initialize as empty list
             self.active_section_index = 0
             self.active_section = None  # Initialize active_section attribute
-            self.lesson_content = None  # Initialize lesson_content as None
-            self.current_section_content = ""  # Initialize current_section_content as an empty string
             self.load_content()
 
         def update_current_section(self):
@@ -89,27 +102,8 @@ def app():
                 self.active_section = None  # No more lesson_sections
                 print("No more sections to update.") #debugg
 
-        def handle_next_section(self):
-            print(f"Handling 'next section' command. Current section: {self.active_section}")  # Debugging print statement
-            # Check if the lesson file has been initialized
-            if self.lesson_content is None:
-                # If not, initialize the lesson file
-                self.initialize_lesson_file(self.current_section_content)
-                # Update lesson_content to an empty string
-                self.lesson_content = ""
-            # Update the section
-            self.update_current_section()
-            # Add the section to the lesson content
-            self.add_section(self.current_section_content)
-            # Save the lesson content to a .txt file
-            self.save_lesson()
-            # Clear the current_section_content for the next section
-            self.current_section_content = ""
-            print(f"After handling 'next section' command. Current section: {self.active_section}")  # Debugging print statement
-
-
         def load_data(self):
-            with open(f"templates/{self.template_filename}", "r") as file:
+            with open(f"templates/{self.filename}", "r") as file:
                 content = file.read()
             return content
 
@@ -162,7 +156,7 @@ def app():
         response = chain(
             {"input": user_input, "chat_history": st.session_state.messages[-20:]},
             include_run_info=True,
-            tags=[st.session_state["creator_current_lesson"].template_filename]  # removed selected_lesson_type
+            tags=[st.session_state["creator_current_lesson"].filename]  # removed selected_lesson_type
         )
         return response
 
@@ -177,13 +171,9 @@ def app():
             section_title = user_input[len("switch to "):]
             st.session_state["creator_current_lesson"].set_section(section_title)
         elif user_input == "next section":
-            # Handle the next section
-            st.session_state["creator_current_lesson"].handle_next_section()
-            # Update creator_current_section after handling the next section
+            st.session_state["creator_current_lesson"].update_current_section()  # Update creator_current_section before using it
             st.session_state["creator_current_section"] = st.session_state["creator_current_lesson"].active_section
-        else:
-            # Store the user's input as the content for the current section
-            st.session_state["creator_current_lesson"].current_section_content = user_input
+
         with st.chat_message("assistant"):
             prompt_template = get_prompt_template(st.session_state["creator_current_lesson"])
             chain = get_llm_chain(prompt_template)
@@ -205,11 +195,10 @@ def app():
             st.button("👎", on_click=send_feedback, args=(run_id, 0))
 
     def initialize_state():
-        if st.session_state.get("creator_current_lesson_file") != st.session_state["creator_current_lesson"].template_filename:
-            st.session_state["creator_current_lesson_file"] = st.session_state["creator_current_lesson"].template_filename
-            welcome_message = f"Once you are prepared, we shall begin creating a lesson plan based on {st.session_state['creator_current_lesson'].template_filename}. I will be your guide."
+        if st.session_state.get("creator_current_lesson_file") != selected_lesson_file:
+            st.session_state["creator_current_lesson_file"] = selected_lesson_file
+            welcome_message = f"Once you are prepared, we shall begin creating a lesson plan based on {selected_lesson_file}. I will be your guide."
             st.session_state["messages"] = [AIMessage(content=welcome_message)]
-
 
     # Message handling and interaction
     def send_feedback(run_id, score):
@@ -222,9 +211,9 @@ def app():
             else:
                 st.chat_message("assistant").write(msg.content)
     
-    def update_session_state(session_state, selected_template_file, active_section):
-        if session_state["creator_current_lesson"] is None or session_state["creator_current_lesson"].template_filename != selected_template_file:
-            session_state["creator_current_lesson"] = Lesson(selected_template_file)
+    def update_session_state(session_state, selected_lesson_file, active_section):
+        if session_state["creator_current_lesson"] is None or session_state["creator_current_lesson"].filename != selected_lesson_file:
+            session_state["creator_current_lesson"] = Lesson(selected_lesson_file)
             session_state["creator_current_lesson"].update_current_section()  # Update creator_current_section immediately
         if session_state["creator_current_section"] is None or (session_state["creator_current_lesson"].active_section is not None and session_state["creator_current_section"] != session_state["creator_current_lesson"].active_section):
             session_state["creator_current_section"] = session_state["creator_current_lesson"].active_section
@@ -233,10 +222,10 @@ def app():
     langsmith_client = Client()
 
     # Lesson selection sidebar
-    selected_template_file = st.sidebar.selectbox("Select Template", os.listdir("templates"))
+    selected_lesson_file = st.sidebar.selectbox("Select Template", os.listdir("templates"))
 
     # Create a new Lesson object
-    update_session_state(st.session_state, selected_template_file, st.session_state["creator_current_section"])
+    update_session_state(st.session_state, selected_lesson_file, st.session_state["creator_current_section"])
 
     # Dropdown menu for section selection
     selected_section = st.sidebar.selectbox("Section Preview", st.session_state["creator_current_lesson"].get_section_names(), key='section_select')
