@@ -93,9 +93,16 @@ def app():
     def handle_user_input():
         if user_input := st.chat_input():
             st.chat_message("user").write(user_input)
+            # Check if the chat history exists in st.session_state
+            if f"{st.session_state['current_selection']}_chat_history" not in st.session_state:
+                # If the chat history does not exist, initialize it to an empty list
+                st.session_state[f"{st.session_state['current_selection']}_chat_history"] = []
+            # Append the user input to the appropriate chat history
+            st.session_state[f"{st.session_state['current_selection']}_chat_history"].append(user_input)
+            print(f"User's prompt: {user_input}")  # Debugging print statement
             return user_input
         return None
-
+    
     def get_prompt_template(teacher_current_lesson):
         prompt_template = load_section_prompt(st.session_state["teacher_current_lesson"])
         return prompt_template
@@ -119,6 +126,8 @@ def app():
         st.session_state.messages.append(AIMessage(content=response[chain.output_key]))
 
     def handle_assistant_response(user_input, teacher_current_lesson):
+        print("Before handle_assistant_response: ", st.session_state)  # Debugging print statement
+        print(f"Handling assistant response for user's prompt: {user_input}")  # Debugging print statement
         # Check if the user's input contains a command to switch sections
         if user_input.startswith("switch to "):
             section_title = user_input[len("switch to "):]
@@ -126,11 +135,18 @@ def app():
         elif user_input == "next section":
             st.session_state["teacher_current_lesson"].update_current_section()  # Update teacher_current_section before using it
             st.session_state["teacher_current_section"] = st.session_state["teacher_current_lesson"].active_section
+        print("After handle_assistant_response: ", st.session_state)  # Debugging print statement
 
         with st.chat_message("assistant"):
             prompt_template = get_prompt_template(st.session_state["teacher_current_lesson"])
             chain = get_llm_chain(prompt_template)
             response = get_response(chain, user_input)
+            # Check if the chat history exists in st.session_state
+            if f"{st.session_state['current_selection']}_chat_history" not in st.session_state:
+                # If the chat history does not exist, initialize it to an empty list
+                st.session_state[f"{st.session_state['current_selection']}_chat_history"] = []
+            # Append the assistant response to the appropriate chat history
+            st.session_state[f"{st.session_state['current_selection']}_chat_history"].append(response)
             update_messages(user_input, response, chain)
             run_id = response["__run"].run_id
 
@@ -159,7 +175,13 @@ def app():
         langsmith_client.create_feedback(run_id, "user_score", score=score)
 
     def display_messages():
-        for msg in st.session_state["messages"]:
+        # Check if the chat history exists in st.session_state
+        if f"{st.session_state['current_selection']}_chat_history" not in st.session_state:
+            # If the chat history does not exist, return early
+            return
+
+        # Display the messages from the appropriate chat history
+        for msg in st.session_state[f"{st.session_state['current_selection']}_chat_history"]:
             if isinstance(msg, HumanMessage):
                 st.chat_message("user").write(msg.content)
             else:

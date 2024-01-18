@@ -139,6 +139,12 @@ def app():
     def handle_user_input():
         if user_input := st.chat_input():
             st.chat_message("user").write(user_input)
+            # Check if the chat history exists in st.session_state
+            if f"{st.session_state['current_selection']}_chat_history" not in st.session_state:
+                # If the chat history does not exist, initialize it to an empty list
+                st.session_state[f"{st.session_state['current_selection']}_chat_history"] = []
+            # Append the user input to the appropriate chat history
+            st.session_state[f"{st.session_state['current_selection']}_chat_history"].append(user_input)
             print(f"User's prompt: {user_input}")  # Debugging print statement
             return user_input
         return None
@@ -166,6 +172,7 @@ def app():
         st.session_state.messages.append(AIMessage(content=response[chain.output_key]))
 
     def handle_assistant_response(user_input, creator_current_lesson):
+        print("Before handle_assistant_response: ", st.session_state)  # Debugging print statement
         print(f"Handling assistant response for user's prompt: {user_input}")  # Debugging print statement
         # Check if the user's input contains a command to switch sections
         if user_input.startswith("switch to "):
@@ -174,16 +181,23 @@ def app():
         elif user_input == "next section":
             st.session_state["creator_current_lesson"].update_current_section()  # Update creator_current_section before using it
             st.session_state["creator_current_section"] = st.session_state["creator_current_lesson"].active_section
+        print("After handle_assistant_response: ", st.session_state)  # Debugging print statement
 
         with st.chat_message("assistant"):
             prompt_template = get_prompt_template(st.session_state["creator_current_lesson"])
             chain = get_llm_chain(prompt_template)
             response = get_response(chain, user_input)
+            # Check if the chat history exists in st.session_state
+            if f"{st.session_state['current_selection']}_chat_history" not in st.session_state:
+                # If the chat history does not exist, initialize it to an empty list
+                st.session_state[f"{st.session_state['current_selection']}_chat_history"] = []
+            # Append the assistant response to the appropriate chat history
+            st.session_state[f"{st.session_state['current_selection']}_chat_history"].append(response)
             update_messages(user_input, response, chain)
             run_id = response["__run"].run_id
 
             display_feedback_buttons(run_id)  # Display feedback buttons after assistant's response
-
+            
     def display_feedback_buttons(run_id):
         col_blank, col_text, col1, col2 = st.columns([10, 2, 1, 1])
         with col_text:
@@ -196,28 +210,45 @@ def app():
             st.button("👎", on_click=send_feedback, args=(run_id, 0))
 
     def initialize_state():
+        print("Before initialization: ", st.session_state)  # Debugging print statement
         if st.session_state.get("creator_current_lesson_file") != selected_lesson_file:
             st.session_state["creator_current_lesson_file"] = selected_lesson_file
-            welcome_message = f"Once you are prepared, we shall begin creating a lesson plan based on {selected_lesson_file}. I will be your guide."
+            # Generate a welcome message using the AI model
+            welcome_message = generate_welcome_message(selected_lesson_file)
             st.session_state["messages"] = [AIMessage(content=welcome_message)]
+        print("After initialization: ", st.session_state)  # Debugging print statement
+
+    def generate_welcome_message(lesson_file):
+        # Use the AI model to generate a welcome message based on the lesson file
+        # This is just a placeholder. You would need to replace this with your actual code to generate a message using the AI model.
+        return f"Welcome to the lesson plan creator. We are going to create a lesson plan based on {lesson_file}. Let's get started!"
+
 
     # Message handling and interaction
     def send_feedback(run_id, score):
         langsmith_client.create_feedback(run_id, "user_score", score=score)
 
     def display_messages():
-        for msg in st.session_state["messages"]:
+        # Check if the chat history exists in st.session_state
+        if f"{st.session_state['current_selection']}_chat_history" not in st.session_state:
+            # If the chat history does not exist, return early
+            return
+
+        # Display the messages from the appropriate chat history
+        for msg in st.session_state[f"{st.session_state['current_selection']}_chat_history"]:
             if isinstance(msg, HumanMessage):
                 st.chat_message("user").write(msg.content)
             else:
                 st.chat_message("assistant").write(msg.content)
     
     def update_session_state(session_state, selected_lesson_file, active_section):
+        print("Before update: ", session_state)  # Debugging print statement
         if session_state["creator_current_lesson"] is None or session_state["creator_current_lesson"].filename != selected_lesson_file:
             session_state["creator_current_lesson"] = Lesson(selected_lesson_file)
             session_state["creator_current_lesson"].update_current_section()  # Update creator_current_section immediately
         if session_state["creator_current_section"] is None or (session_state["creator_current_lesson"].active_section is not None and session_state["creator_current_section"] != session_state["creator_current_lesson"].active_section):
             session_state["creator_current_section"] = session_state["creator_current_lesson"].active_section
+        print("After update: ", session_state)  # Debugging print statement
 
     # Initialize LangSmith langsmith_client
     langsmith_client = Client()
@@ -241,4 +272,7 @@ def app():
 
     # Handle user input and assistant responses
     if user_input := handle_user_input():
+        print("User input: ", user_input)  # Debugging print statement
         handle_assistant_response(user_input, st.session_state["creator_current_lesson"])
+        print("State after handling response: ", st.session_state)  # Debugging print statement
+        print("State after updating session: ", st.session_state)  # Debugging print statement

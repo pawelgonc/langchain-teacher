@@ -12,7 +12,13 @@ PAGES = {
     "Teacher": teacher,
 }
 
+def navigation():
+    st.sidebar.title('Navigation')
+    # Get the current page selection
+    st.session_state["current_selection"] = st.sidebar.radio("Go to", list(PAGES.keys()))
+
 def main():
+    print("Before main: ", st.session_state)  # Debugging print statement
     # Initialize the session state for 'Teacher'
     if "teacher" not in st.session_state:
         st.session_state.teacher = {}
@@ -22,6 +28,8 @@ def main():
         st.session_state["teacher_current_section"] = None
     if "teacher_current_lesson_file" not in st.session_state:
         st.session_state["teacher_current_lesson_file"] = None
+    if "teacher_chat_history" not in st.session_state:
+        st.session_state["teacher_chat_history"] = []
 
     # Initialize the session state for 'Creator'
     if "creator" not in st.session_state:
@@ -32,22 +40,22 @@ def main():
         st.session_state["creator_current_section"] = None
     if "creator_current_lesson_file" not in st.session_state:
         st.session_state["creator_current_lesson_file"] = None
-
-    st.sidebar.title('Navigation')
-    
-    # Get the current page selection
-    current_selection = st.sidebar.radio("Go to", list(PAGES.keys()))
+    if "creator_chat_history" not in st.session_state:
+        st.session_state["creator_chat_history"] = []
     
     # Check if the page selection has changed
-    if st.session_state.get("current_selection") != current_selection:
+    if st.session_state.get("current_selection") != st.session_state["current_selection"]:
         # If the selection has changed, clear the messages
         st.session_state["messages"] = []
         # Update the current selection
-        st.session_state["current_selection"] = current_selection
+        st.session_state["current_selection"] = st.session_state["current_selection"]
 
     # Load the selected page
-    page = PAGES[current_selection]
+    page = PAGES[st.session_state["current_selection"]]
     page.app()
 
-if __name__ == "__main__":
-    main()
+    print("After main: ", st.session_state)  # Debugging print statement
+
+# Call the navigation function before main
+navigation()
+main()
