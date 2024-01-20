@@ -144,7 +144,7 @@ def app():
                 # If the chat history does not exist, initialize it to an empty list
                 st.session_state[f"{st.session_state['current_selection']}_chat_history"] = []
             # Append the user input to the appropriate chat history
-            st.session_state[f"{st.session_state['current_selection']}_chat_history"].append(user_input)
+            st.session_state[f"{st.session_state['current_selection']}_chat_history"].append(HumanMessage(content=user_input))
             print(f"User's prompt: {user_input}")  # Debugging print statement
             return user_input
         return None
@@ -169,7 +169,7 @@ def app():
 
     def update_messages(user_input, response, chain):
         st.session_state.messages.append(HumanMessage(content=user_input))
-        st.session_state.messages.append(AIMessage(content=response[chain.output_key]))
+        st.session_state[f"{st.session_state['current_selection']}_chat_history"].append(AIMessage(content=response))
 
     def handle_assistant_response(user_input, creator_current_lesson):
         print("Before handle_assistant_response: ", st.session_state)  # Debugging print statement
@@ -192,7 +192,7 @@ def app():
                 # If the chat history does not exist, initialize it to an empty list
                 st.session_state[f"{st.session_state['current_selection']}_chat_history"] = []
             # Append the assistant response to the appropriate chat history
-            st.session_state[f"{st.session_state['current_selection']}_chat_history"].append(response)
+            st.session_state[f"{st.session_state['current_selection']}_chat_history"].append(AIMessage(content=response))
             update_messages(user_input, response, chain)
             run_id = response["__run"].run_id
 
