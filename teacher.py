@@ -16,7 +16,7 @@ def app():
     st.title('Teacher')
     st.write('''
     1. I begin teaching the first point/topic from the list.
-    2. Copy and prompt the name of the point/topic to switch.
+    2. Copy the name of the point/topic and prompt to switch.
     ''')
 
     button_css = """.stButton>button {
