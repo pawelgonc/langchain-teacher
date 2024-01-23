@@ -14,6 +14,11 @@ from teacher_prompt import load_section_prompt
 
 def app():
     st.title('Teacher')
+    st.write('''
+    1. I begin teaching the first point/topic from the list.
+    2. Copy and prompt the name of the point/topic to switch.
+    ''')
+
     button_css = """.stButton>button {
         color: #4F8BF9;
         border-radius: 50%;
@@ -146,7 +151,7 @@ def app():
     def initialize_state():
         if st.session_state.get("teacher_current_lesson_file") != selected_lesson_file:
             st.session_state["teacher_current_lesson_file"] = selected_lesson_file
-            welcome_message = f"Once you are prepared, we shall begin our exploration of {selected_lesson_file}. I will be your guide throughout this intellectual journey."
+            welcome_message = f"Once you are prepared, we shall begin our exploration of {selected_lesson_file}. I will be your guide."
             st.session_state["messages"] = [AIMessage(content=welcome_message)]
 
     # Message handling and interaction
@@ -177,11 +182,16 @@ def app():
     update_session_state(st.session_state, selected_lesson_file, st.session_state["teacher_current_section"])
 
     # Dropdown menu for section selection
-    selected_section = st.sidebar.selectbox("Section Preview", st.session_state["teacher_current_lesson"].get_section_names(), key='section_select')
+    selected_section = st.sidebar.selectbox("Browse points/topics", st.session_state["teacher_current_lesson"].get_section_names(), key='section_select')
+
+    # Display the selected section name as a code block
+    st.sidebar.code(selected_section)
+
     # Get the content of the selected section
     section_content = getattr(st.session_state["teacher_current_lesson"], selected_section)
     # Display the content in the sidebar
     st.sidebar.markdown(section_content)
+
 
     initialize_state()
 
