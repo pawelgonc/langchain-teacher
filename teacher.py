@@ -119,23 +119,18 @@ def app():
         st.session_state.messages.append(AIMessage(content=response[chain.output_key]))
 
     def handle_assistant_response(user_input, teacher_current_lesson):
-        # Check if the user's input contains a command to switch sections
-        if user_input.startswith("switch to "):
-            section_title = user_input[len("switch to "):]
-            st.session_state["teacher_current_lesson"].set_section(section_title)
-        elif user_input == "next section":
-            st.session_state["teacher_current_lesson"].update_current_section()  # Update teacher_current_section before using it
-            st.session_state["teacher_current_section"] = st.session_state["teacher_current_lesson"].active_section
-
-        with st.chat_message("assistant"):
-            prompt_template = get_prompt_template(st.session_state["teacher_current_lesson"])
-            chain = get_llm_chain(prompt_template)
-            response = get_response(chain, user_input)
-            update_messages(user_input, response, chain)
-            run_id = response["__run"].run_id
-
-            display_feedback_buttons(run_id)  # Display feedback buttons after assistant's response
-
+        # Check if the user's input matches a section title
+        if user_input in teacher_current_lesson.get_section_names():
+            teacher_current_lesson.set_section(user_input)
+        else:
+            # Continue the conversation without alteration
+            with st.chat_message("assistant"):
+                prompt_template = get_prompt_template(st.session_state["teacher_current_lesson"])
+                chain = get_llm_chain(prompt_template)
+                response = get_response(chain, user_input)
+                update_messages(user_input, response, chain)
+                run_id = response["__run"].run_id
+                display_feedback_buttons(run_id)  # Display feedback buttons after assistant's response
 
     def display_feedback_buttons(run_id):
         col_blank, col_text, col1, col2 = st.columns([10, 2, 1, 1])
