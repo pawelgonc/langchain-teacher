@@ -1,13 +1,13 @@
 # app.py
 
 import streamlit as st
-import teacher, description  # Removed 'creator'
+import teacher, welcome_page  # Removed 'creator'
 
 # Set the page config
 st.set_page_config(page_title="LangChain", page_icon="🦜")
 
 PAGES = {
-    "Description": description,
+    "Description": welcome_page,
     "Teacher": teacher,  # Removed 'Lesson Creator'
 }
 
