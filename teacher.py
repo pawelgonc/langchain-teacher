@@ -6,8 +6,6 @@ from langchain.chat_models import ChatOpenAI
 from langchain.schema import HumanMessage, AIMessage
 from langsmith import Client
 from langchain.callbacks.base import BaseCallbackHandler
-from langchain.prompts import ChatPromptTemplate, MessagesPlaceholder, HumanMessagePromptTemplate
-from langchain.memory import ConversationBufferMemory
 from langchain.chains import LLMChain
 import os
 from teacher_prompt import load_section_prompt
@@ -15,9 +13,10 @@ from teacher_prompt import load_section_prompt
 def app():
     st.title('Teacher')
     st.write('''
-    1. I begin teaching the first point/topic from the list.
-    2. Copy the name of the point/topic and send it to switch.
-    3. Continue the conversation
+    1. I begin teaching the firstsection from the list.
+    2. Browsing the section does not switch the section I am teaching.
+    3. Copy the title name of the section and send it to switch.
+    4. Continue the conversation.
     ''')
 
     button_css = """.stButton>button {
@@ -184,7 +183,7 @@ def app():
     update_session_state(st.session_state, selected_lesson_file, st.session_state["teacher_current_section"])
 
     # Dropdown menu for section selection
-    selected_section = st.sidebar.selectbox("Browse points/topics", st.session_state["teacher_current_lesson"].get_section_names(), key='section_select')
+    selected_section = st.sidebar.selectbox("Browse sections", st.session_state["teacher_current_lesson"].get_section_names(), key='section_select')
 
     # Display the selected section name as a code block
     st.sidebar.code(selected_section)

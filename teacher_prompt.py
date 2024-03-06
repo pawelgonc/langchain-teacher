@@ -1,6 +1,5 @@
 from langchain.prompts import ChatPromptTemplate, MessagesPlaceholder, HumanMessagePromptTemplate
 from langchain.schema import SystemMessage
-from langchain.memory import ConversationBufferMemory
 
 def load_section_prompt(teacher_current_lesson):
     section_title = teacher_current_lesson.active_section
