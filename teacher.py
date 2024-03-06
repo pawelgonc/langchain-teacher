@@ -12,10 +12,10 @@ from teacher_prompt import load_section_prompt
 
 def app():
     st.write('''
-    1. Selecting Lesson in menu **resets** the conversation.
-    2. Selecting Section in menu **does not affect** the conversation.
+    1. Selecting Lesson **resets** the conversation.
+    2. Selecting Section does **not affect** the conversation.
     3. Conversation begins with the first Section.
-    4. To switch Section: **copy** the Section name and send it as message.
+    4. To switch Section: **copy** the Section's **title** and send it as message.
     ''')
 
     button_css = """.stButton>button {
