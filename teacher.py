@@ -16,7 +16,8 @@ def app():
     st.title('Teacher')
     st.write('''
     1. I begin teaching the first point/topic from the list.
-    2. Copy the name of the point/topic and prompt to switch.
+    2. Copy the name of the point/topic and send it to switch.
+    3. Continue the conversation
     ''')
 
     button_css = """.stButton>button {
@@ -47,11 +48,12 @@ def app():
                 return None, None  # No more lesson_sections
             
         def __init__(self, filename):
-            self.filename = filename
+            self.filename = filename.replace('.txt', '')  # This will remove '.txt' from the filename
             self.lesson_sections = []  # Initialize as empty list
             self.active_section_index = 0
             self.active_section = None  # Initialize active_section attribute
             self.load_content()
+
 
         def update_current_section(self):
             if self.active_section_index < len(self.lesson_sections):
@@ -86,7 +88,7 @@ def app():
 
         def set_section(self, section_title):
             if section_title in self.lesson_sections:
-                print(f"Switching section from '{self.active_section}' to '{section_title}'") #debugg
+                print(f"`Switch`ing section from '{self.active_section}' to '{section_title}'") #debugg
                 self.active_section_index = self.lesson_sections.index(section_title)
                 self.update_current_section()
             else:

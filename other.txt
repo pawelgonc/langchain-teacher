@@ -1,0 +1,7 @@
+
+W pracy dyplomowej:
+1. analiza
+
+3. diagramy (punkt chyba 3) jak dziala kod, architektura, struktura: jaka jest interakcja miedzy GPT a laptoopem (nie dziala bez wifi)
+
+5. instrukcja step by step dla uzytkownika + screenshots na kazdy krok
