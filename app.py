@@ -1,13 +1,13 @@
 # app.py
 
 import streamlit as st
-import teacher, welcome_page 
+import teacher, instructions_page 
 
 # Set the page config
 st.set_page_config(page_title="LangChain", page_icon="🦜")
 
 PAGES = {
-    "Welcome": welcome_page,
+    "Instructions": instructions_page,
     "Teacher": teacher
 }
 
@@ -22,8 +22,7 @@ def main():
     if "teacher_current_lesson_file" not in st.session_state:
         st.session_state["teacher_current_lesson_file"] = None
 
-    st.sidebar.title('Navigation')
-    selection = st.sidebar.radio("Go to", list(PAGES.keys()))
+    selection = st.sidebar.radio(" ", list(PAGES.keys()))
     page = PAGES[selection]
     page.app()
 
