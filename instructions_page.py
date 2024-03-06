@@ -6,7 +6,7 @@ def app():
 
     with col1:
         st.write('''
-        ##### I. Create new lesson manually
+        ##### I. Custom lesson
         1. Create a .txt file in the **lessons** directory.
         2. In that file, each section must be separated:
         ```
@@ -25,14 +25,15 @@ def app():
 
     with col2:
         st.write('''
-        ##### II. Create new lesson using Bing's Copilot
-        1. Copy the prompt below to the [Bing's Copilot](https://www.bing.com/search?q=Bing+AI&showconv=1&FORM=hpcodx) and replace the "abc":
+        ##### II. Create a lesson using Bing's Copilot
+        1. Copy the prompt below to the [Bing's Copilot](https://www.bing.com/search?q=Bing+AI&showconv=1&FORM=hpcodx):
         ```
-        1. Create a lesson plan for the "abc".
+        1. Create a lesson for the "abc".
         2. Include sections: "abc", and "abc".
 
         3. Details:
-        a. This lesson plan must follow this structure:
+        a.
+        This lesson must follow this structure:
         section title
         - explanation
         - example
@@ -43,6 +44,6 @@ def app():
         4. Lesson plan must be in the format of code block.
         ```
         2. Create a .txt file in the **lessons** directory.
-        3. Copy the created **Sections** and paste them to that file.
+        3. Copy created **Sections** to that file.
         4. Save the file and the lesson will be visible in the menu **Lesson**.
         ''')

@@ -7,7 +7,7 @@ import teacher, instructions_page
 st.set_page_config(page_title="LangChain", page_icon="🦜")
 
 PAGES = {
-    "Instructions": instructions_page,
+    "Instruction": instructions_page,
     "Teacher": teacher
 }
 

@@ -8,7 +8,7 @@ def load_section_prompt(teacher_current_lesson):
     print(f"Loading section '{section_title}' into teacher_prompt.") #debugg
 
     template = f"""
-    You are an educator, and you are currently teaching the '{section_title}' section of the lesson. Your task is to guide the user through this section in detail, considering their current understanding. Limit any responses to only one concept or step per prompt.
+    You are an educator, and you are currently teaching the '{section_title}' section of the lesson. Your task is to guide the user through this section, considering their current understanding. Limit your responses to only one concept or step per prompt.
 
     Here is the content of this section:
 
