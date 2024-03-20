@@ -63,9 +63,10 @@ def app():
                 print("No more sections to update.") #debugg
 
         def load_data(self):
-            with open(f"lessons/{self.filename}", "r") as file:
+            with open(f"lessons/{self.filename}.txt", "r") as file:
                 content = file.read()
             return content
+
 
         def parse_data(self, content):
             sections = content.split("\n\n")  # Use double newline as separator
@@ -166,17 +167,24 @@ def app():
                 st.chat_message("assistant").write(msg.content)
     
     def update_session_state(session_state, selected_lesson_file, active_section):
-        if session_state["teacher_current_lesson"] is None or session_state["teacher_current_lesson"].filename != selected_lesson_file:
-            session_state["teacher_current_lesson"] = Lesson(selected_lesson_file)
+        # Add '.txt' extension back to filename when creating Lesson object
+        if session_state["teacher_current_lesson"] is None or session_state["teacher_current_lesson"].filename != selected_lesson_file + '.txt':
+            session_state["teacher_current_lesson"] = Lesson(selected_lesson_file + '.txt')
             session_state["teacher_current_lesson"].update_current_section()  # Update teacher_current_section immediately
         if session_state["teacher_current_section"] is None or (session_state["teacher_current_lesson"].active_section is not None and session_state["teacher_current_section"] != session_state["teacher_current_lesson"].active_section):
             session_state["teacher_current_section"] = session_state["teacher_current_lesson"].active_section
 
+
     # Initialize LangSmith langsmith_client
     langsmith_client = Client()
 
-    # Lesson selection sidebar
-    selected_lesson_file = st.sidebar.selectbox("Lesson", os.listdir("lessons"))
+    # Get list of all files in the 'lessons' directory
+    all_files = os.listdir("lessons")
+
+    # Remove '.txt' extension from filenames for the dropdown menu
+    lesson_files = [file.replace('.txt', '') for file in all_files]
+
+    selected_lesson_file = st.sidebar.selectbox("Lesson", lesson_files)
 
     # Create a new Lesson object
     update_session_state(st.session_state, selected_lesson_file, st.session_state["teacher_current_section"])
@@ -191,7 +199,6 @@ def app():
     section_content = getattr(st.session_state["teacher_current_lesson"], selected_section)
     # Display the content in the sidebar
     st.sidebar.markdown(section_content)
-
 
     initialize_state()
 

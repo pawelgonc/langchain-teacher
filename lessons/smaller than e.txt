@@ -1,0 +1,7 @@
+# Quarks
+- Explanation: Quarks are elementary particles and a fundamental constituent of matter. They combine to form composite particles called hadrons, the most stable of which are protons and neutrons, the components of atomic nuclei.
+- Example: Up and down quarks form protons and neutrons. A proton is composed of two up quarks and one down quark, while a neutron is composed of two down quarks and one up quark.
+
+# Neutrinos
+- Explanation: Neutrinos are subatomic particles that are very similar to electrons, but have no electric charge and a very small mass, which might even be zero. They are extremely weakly interacting, meaning they pass through normal matter unimpeded and undetected.
+- Example: Neutrinos are produced in large numbers in the sun's core and other stars as a byproduct of nuclear fusion. Despite their large numbers, they are incredibly difficult to detect due to their weak interaction with matter.
